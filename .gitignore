@@ -1,0 +1,49 @@
+# --- General / System ---
+.DS_Store
+*.log
+tumbs.db
+
+# --- IDE (PyCharm / VSCode) ---
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# --- Backend (Python / FastAPI) ---
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/.pytest_cache/
+# Virtual Environments
+backend/.venv/
+backend/venv/
+backend/env/
+# Environment Variables (SENSITIVE)
+backend/.env
+backend/.env.local
+
+# --- Frontend (Next.js / Node) ---
+frontend/node_modules/
+frontend/.next/
+frontend/build/
+frontend/out/
+frontend/dist/
+frontend/.pnp
+frontend/.pnp.js
+frontend/coverage/
+# Environment Variables (SENSITIVE)
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+# Debug logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# --- Local Data ---
+*.sqlite3
+*.db
