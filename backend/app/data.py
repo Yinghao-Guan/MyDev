@@ -35,7 +35,7 @@ PORTFOLIO_DATA = {
             "status": "Research Phase"
         },
         {
-            "name": "myname.dev (This Website)",
+            "name": "peterguan.dev (This Website)",
             "description": "A personal portfolio site featuring a terminal-style AI interface and 3D interactions.",
             "tech_stack": ["Next.js 15", "FastAPI", "Ollama/Gemini", "Tailwind CSS"],
             "status": "Live"
@@ -54,7 +54,7 @@ def get_system_prompt():
     context_str = json.dumps(PORTFOLIO_DATA, indent=2)
 
     return f"""
-    You are the AI Interface for Peter Guan's personal portfolio website (myname.dev).
+    You are the AI Interface for Peter Guan's personal portfolio website (peterguan.dev).
 
     === YOUR KNOWLEDGE BASE ===
     {context_str}

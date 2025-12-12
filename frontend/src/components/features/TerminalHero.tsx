@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Terminal, Cpu, Wifi } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // 定义消息类型
 type Message = {
@@ -11,6 +12,7 @@ type Message = {
 };
 
 export default function TerminalHero() {
+  const router = useRouter();
   // 状态管理
   const [history, setHistory] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -63,15 +65,122 @@ export default function TerminalHero() {
     }
   };
 
-  // 4. 提交逻辑 (修复了重复字符问题)
+  // 4. 提交逻辑
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMsg = input.trim();
+    const rawInput = input;
+    const command = input.trim().toLowerCase(); // 转小写
+    const args = input.trim().split(" "); // 分割参数，例如 ["cd", "projects"]
+    // ... 前面的代码不变 ...
+    const mainCommand = args[0].toLowerCase();
 
-    // 添加用户消息
-    setHistory((prev) => [...prev, { role: "user", content: userMsg }]);
+    // --- [核心修改] 增强版命令拦截器 ---
+
+    // 1. Clear (清屏)
+    if (mainCommand === "clear") {
+      setHistory([]);
+      setInput("");
+      return;
+    }
+
+    // 2. Help (帮助)
+    if (mainCommand === "help") {
+      setHistory((prev) => [...prev, { role: "user", content: rawInput }]);
+      const helpMessage = `
+GNU bash, version 5.2.15(1)-release (myname-dev-os)
+These shell commands are defined internally. Type 'help' to see this list.
+
+  help     Display this help text
+  clear    Clear the terminal screen
+  ls       List directory contents (projects & pages)
+  cd       Change directory (navigate to pages)
+  <text>   Send prompt to AI Assistant (LLM)
+      `;
+      setHistory((prev) => [...prev, { role: "system", content: helpMessage.trim() }]);
+      setInput("");
+      return;
+    }
+
+    // 3. Sudo (彩蛋：权限拒绝)
+    if (mainCommand === "sudo") {
+      setHistory((prev) => [...prev, { role: "user", content: rawInput }]);
+      // 模拟短暂的停顿，像是在校验权限
+      setTimeout(() => {
+        setHistory((prev) => [
+          ...prev,
+          { role: "system", content: "Permission denied: You are not Peter Guan." }
+        ]);
+      }, 200);
+      setInput("");
+      return;
+    }
+
+    // 4. 受限命令 (模拟没有写权限)
+    const restrictedCommands = ["mkdir", "touch", "rm", "rmdir", "cp", "mv", "chmod", "chown", "ifconfig", "ping", "nano", "vim", "vi"];
+    if (restrictedCommands.includes(mainCommand)) {
+      setHistory((prev) => [...prev, { role: "user", content: rawInput }]);
+      // 模仿 Linux 标准权限报错
+      setHistory((prev) => [
+        ...prev,
+        { role: "system", content: `bash: ${mainCommand}: permission denied` }
+      ]);
+      setInput("");
+      return;
+    }
+
+    // 5. ls (列出目录)
+    if (mainCommand === "ls") {
+      setHistory((prev) => [...prev, { role: "user", content: rawInput }]);
+      const treeOutput = `
+.
+├── about/
+└── projects/
+    ├── Veru
+    ├── MyMD
+    ├── Emotional_Support_Agent
+    └── myname.dev
+      `;
+      setHistory((prev) => [...prev, { role: "system", content: treeOutput.trim() }]);
+      setInput("");
+      return;
+    }
+
+    // 6. cd (跳转页面)
+    if (mainCommand === "cd") {
+      setHistory((prev) => [...prev, { role: "user", content: rawInput }]);
+      const target = args[1] ? args[1].toLowerCase() : "~";
+
+      if (target === "projects" || target === "projects/" || target === "./projects") {
+        setHistory((prev) => [...prev, { role: "system", content: "Navigating to ~/projects..." }]);
+        setTimeout(() => router.push("/projects"), 500);
+        return;
+      }
+      else if (target === "about" || target === "about/") {
+        setHistory((prev) => [...prev, { role: "system", content: "Navigating to ~/about..." }]);
+        setTimeout(() => router.push("/about"), 500);
+        return;
+      }
+      else if (target === ".." || target === "~" || target === "/") {
+         setHistory((prev) => [...prev, { role: "system", content: "Directory is already root." }]);
+         setInput("");
+         return;
+      }
+      else {
+        // 保持 GNU Bash 风格报错
+        setHistory((prev) => [...prev, { role: "system", content: `bash: cd: ${target}: No such file or directory` }]);
+        setInput("");
+        return;
+      }
+    }
+
+    // --- 命令拦截器结束 ---
+
+    // Case 5: 普通对话 (流式 AI)
+    // ... (保持原来的 fetch 逻辑不变，直接粘贴之前的代码即可) ...
+    // 为了节省篇幅，这里我简写了，请保留你原来的 fetch 逻辑
+    setHistory((prev) => [...prev, { role: "user", content: rawInput }]);
     setInput("");
     setIsLoading(true);
 
@@ -79,50 +188,32 @@ export default function TerminalHero() {
       const res = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg }),
+        body: JSON.stringify({ message: rawInput }),
       });
 
       if (!res.ok) throw new Error("Network response was not ok");
       if (!res.body) throw new Error("No response body");
-
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-
-      // 先占位：添加一个空的 assistant 消息
       setHistory((prev) => [...prev, { role: "assistant", content: "" }]);
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
-
-        // 【关键修复】：使用不可变数据写法，防止 Strict Mode 下的双重渲染导致字符重复
         setHistory((prev) => {
-          const newHistory = [...prev]; // 浅拷贝数组
+          const newHistory = [...prev];
           const lastIndex = newHistory.length - 1;
           const lastMsg = newHistory[lastIndex];
-
-          // 确保我们要更新的是最后一条且是 AI 的消息
           if (lastMsg.role === "assistant") {
-            // 创建一个新的消息对象，而不是修改旧的 (Immutable)
-            newHistory[lastIndex] = {
-              ...lastMsg,
-              content: lastMsg.content + chunk
-            };
+            newHistory[lastIndex] = { ...lastMsg, content: lastMsg.content + chunk };
           }
           return newHistory;
         });
       }
-
     } catch (error) {
-      setHistory((prev) => [
-        ...prev,
-        { role: "system", content: "Error: Connection interrupted. Backend offline." }
-      ]);
+      setHistory((prev) => [...prev, { role: "system", content: "Error: Backend offline." }]);
     } finally {
-      setIsLoading(false); // 只有完全结束后，输入框才会再次出现
-      // 稍微延迟一下聚焦，体验更好
+      setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   };
@@ -157,7 +248,7 @@ export default function TerminalHero() {
           {history.map((msg, idx) => (
             <div key={idx} className="mb-2 break-words">
               {msg.role === "system" && (
-                <span className="text-gray-500">{msg.content}</span>
+                <div className="text-gray-500 whitespace-pre-wrap font-mono text-sm">{msg.content}</div>
               )}
               {msg.role === "user" && (
                 <div>
