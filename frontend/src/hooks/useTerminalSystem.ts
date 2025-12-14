@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-// --- [Type Definitions] ---
+// [修改 1]: 扩展类型定义
 export type Message = {
-  role: "system" | "user" | "assistant";
+  role: "system" | "user" | "assistant" | "navigation";
   content: string;
+  isLogo?: boolean; // 新增：专门用于标记 Logo，防止误伤 cowsay
 };
 
-// --- [Helper] Cowsay Logic (纯函数，移到 hook 外部) ---
+// ... (generateCowsay 保持不变) ...
 const generateCowsay = (text: string) => {
   const len = text.length;
   const line = "-".repeat(len + 2);
@@ -34,33 +35,52 @@ export const useTerminalSystem = (isConnectionOpen = true) => {
   const hasBooted = useRef(false);
 
   useEffect(() => {
-    // 如果连接没打开，或者已经启动过，就什么都不做
     if (!isConnectionOpen || hasBooted.current) return;
 
-    hasBooted.current = true; // 标记为已启动
+    hasBooted.current = true;
+
+    // [ASCII Logo]
+    const asciiLogo = `
+$$$$$$$\\             $$\\                         
+$$  __$$\\            $$ |                        
+$$ |  $$ | $$$$$$\\ $$$$$$\\    $$$$$$\\   $$$$$$\\  
+$$$$$$$  |$$  __$$\\\\_$$  _|  $$  __$$\\ $$  __$$\\ 
+$$  ____/ $$$$$$$$ | $$ |    $$$$$$$$ |$$ |  \\__|
+$$ |      $$   ____| $$ |$$\\ $$   ____|$$ |      
+$$ |      \\$$$$$$$\\  \\$$$$  |\\$$$$$$$\\ $$ |      
+\\__|       \\_______|  \\____/  \\_______|\\__|      
+                                                    
+    `;
 
     const bootSequence = [
-      "> Initializing secure connection...",
-      "> Loading user profile: Peter Guan",
-      "> Stack: Next.js 15 / FastAPI / Python / Ollama",
-      "> Access granted.",
-      "> Welcome to peterguan.dev"
+      // [修改 2]: 明确标记 Logo
+      { text: asciiLogo, isLogo: true },
+      { text: "> Initializing Neural Link...", isLogo: false },
+      { text: "> Loading user profile: Peter Guan [Quant/Dev]", isLogo: false },
+      { text: "> System Status: ONLINE", isLogo: false },
+      { text: "> Connection secured.", isLogo: false }
     ];
 
     let delay = 0;
-    bootSequence.forEach((line, index) => {
-      delay += 500;
+    bootSequence.forEach((item, index) => {
+      delay += index === 0 ? 100 : 600;
       setTimeout(() => {
-        setHistory((prev) => [...prev, { role: "system", content: line }]);
+        setHistory((prev) => [
+          ...prev,
+          { role: "system", content: item.text, isLogo: item.isLogo }
+        ]);
+
         if (index === bootSequence.length - 1) {
           setIsBooting(false);
+          // [修改 3]: 启动完成后，添加导航按钮 (Available Actions)
+          setTimeout(() => {
+             setHistory((prev) => [...prev, { role: "navigation", content: "init" }]);
+          }, 200);
         }
       }, delay);
     });
   }, [isConnectionOpen]);
 
-  // --- [Core: Command Processor] ---
-  // 这是 Hook 的核心，UI 组件只需要把用户输入的字符串传进来即可
   const processCommand = useCallback(async (inputRaw: string) => {
     const input = inputRaw.trim();
     if (!input || isLoading) return;
@@ -70,13 +90,11 @@ export const useTerminalSystem = (isConnectionOpen = true) => {
 
     // --- 1. Local Commands Handling ---
 
-    // [Clear]
     if (mainCommand === "clear") {
       setHistory([]);
       return;
     }
 
-    // [Cmatrix]
     if (mainCommand === "cmatrix") {
       setShowMatrix(true);
       return;
@@ -90,15 +108,36 @@ GNU bash, version 5.2.15(1)-release (peterguan-dev-os)
 These shell commands are defined internally. Type 'help' to see this list.
 
   help     Display this help text
-  clear    Clear the terminal screen
-  ls       List directory contents (projects & pages)
+  whoami   Display current user profile
+  ls       List directory contents
   cd       Change directory (navigate to pages)
+  clear    Clear the terminal screen
   cmatrix  Run Matrix screensaver
   cowsay   Make the cow say something
   <text>   Send prompt to AI Assistant (LLM)
       `;
-      setHistory((prev) => [...prev, { role: "system", content: helpMessage.trim() }]);
+      // [修改 4]: help 后跟随导航按钮
+      setHistory((prev) => [
+          ...prev,
+          { role: "system", content: helpMessage.trim() },
+          { role: "navigation", content: "help" }
+      ]);
       return;
+    }
+
+    // [Whoami] - 硬核身份卡
+    if (mainCommand === "whoami") {
+        setHistory((prev) => [...prev, { role: "user", content: input }]);
+        const bio = `
+User: Peter Guan
+Role: Full Stack Developer & Quant Researcher
+Location: Santa Monica, CA
+Bio: A developer bridging the gap between high-performance tech and quantitative finance.
+     Passionate about building 'Hardcore Tools' with modern aesthetics.
+Stack: Python, Next.js, C++, Haskell, PyTorch
+        `;
+        setHistory((prev) => [...prev, { role: "system", content: bio.trim() }]);
+        return;
     }
 
     // [Cowsay]
@@ -117,7 +156,6 @@ These shell commands are defined internally. Type 'help' to see this list.
         ? "Permission denied: You are not Peter Guan."
         : `bash: ${mainCommand}: permission denied`;
 
-      // 模拟一点延迟，增加真实感
       setTimeout(() => {
           setHistory((prev) => [...prev, { role: "system", content: msg }]);
       }, 200);
@@ -150,7 +188,7 @@ These shell commands are defined internally. Type 'help' to see this list.
         setTimeout(() => router.push("/projects"), 500);
       } else if (["about", "about/"].includes(target)) {
         setHistory((prev) => [...prev, { role: "system", content: "Navigating to ~/about..." }]);
-        setTimeout(() => router.push("/about"), 500); // 假设你有 about 页面，或者你可以改成跳去 .com
+        setTimeout(() => router.push("/about"), 500);
       } else if (["..", "~", "/"].includes(target)) {
          setHistory((prev) => [...prev, { role: "system", content: "Directory is already root." }]);
       } else {
@@ -160,13 +198,10 @@ These shell commands are defined internally. Type 'help' to see this list.
     }
 
     // --- 2. AI Processing (LLM) ---
-
-    // 记录用户输入
     setHistory((prev) => [...prev, { role: "user", content: input }]);
     setIsLoading(true);
 
     try {
-      // 这里的 URL 建议最好放到 .env 环境变量里，例如 process.env.NEXT_PUBLIC_API_URL
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
       const res = await fetch(`${apiUrl}/api/chat`, {
@@ -181,7 +216,6 @@ These shell commands are defined internally. Type 'help' to see this list.
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
 
-      // 先添加一个空的 assistant 消息占位
       setHistory((prev) => [...prev, { role: "assistant", content: "" }]);
 
       while (true) {
@@ -189,12 +223,10 @@ These shell commands are defined internally. Type 'help' to see this list.
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
 
-        // 更新最后一条消息（即 AI 的回复）
         setHistory((prev) => {
           const newHistory = [...prev];
           const lastIndex = newHistory.length - 1;
           const lastMsg = newHistory[lastIndex];
-          // 确保只更新 assistant 的消息
           if (lastMsg.role === "assistant") {
             newHistory[lastIndex] = { ...lastMsg, content: lastMsg.content + chunk };
           }
@@ -207,7 +239,7 @@ These shell commands are defined internally. Type 'help' to see this list.
     } finally {
       setIsLoading(false);
     }
-  }, [router, isLoading]); // 依赖项
+  }, [router, isLoading]);
 
   return {
     history,
