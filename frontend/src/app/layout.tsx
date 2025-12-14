@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google"; // 假设你用了这个字体，或者是 Inter
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/react"; // [新增] 引入 Analytics
+import Navbar from "@/components/layout/Navbar"; // [修复] 重新引入 Navbar
+import { Analytics } from "@vercel/analytics/react";
 
 const mono = JetBrains_Mono({
   variable: "--font-mono",
@@ -21,8 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${mono.variable} antialiased bg-[#0d0d0d] text-gray-300`}>
+        <Navbar />
+
+        {/* 页面内容 */}
         {children}
-        <Analytics /> {/* [新增] 插入组件，建议放在 body 最后 */}
+
+        {/* Analytics */}
+        <Analytics />
       </body>
     </html>
   );
