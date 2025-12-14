@@ -41,7 +41,7 @@ origins = [
     "http://localhost:3000",             # 本地开发必须保留
     "https://peterguan.dev",             # 你的主域名
     "https://www.peterguan.dev",         # WWW 子域名
-    "https://mydev.vercel.app", # 建议也加上 Vercel 分配的测试域名
+    "https://my-dev.vercel.app", # 建议也加上 Vercel 分配的测试域名
 ]
 
 app.add_middleware(
