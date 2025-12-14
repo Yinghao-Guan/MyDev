@@ -1,19 +1,16 @@
-// src/app/layout.tsx
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google"; // 引入更好看的代码字体
+import { JetBrains_Mono } from "next/font/google"; // 假设你用了这个字体，或者是 Inter
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
+import { Analytics } from "@vercel/analytics/react"; // [新增] 引入 Analytics
 
-// 配置字体
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const jetbrainsMono = JetBrains_Mono({ 
-  subsets: ["latin"], 
-  variable: "--font-mono" 
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   title: "Peter Guan | Full Stack & Quant",
-  description: "Personal Developer Portfolio",
+  description: "Personal portfolio of Peter Guan. A digital playground for hardcore tools and aesthetic code.",
 };
 
 export default function RootLayout({
@@ -23,14 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-black text-white`}>
-        {/* 导航栏永远在最上面 */}
-        <Navbar />
-        
-        {/* 页面内容，加一个上边距(pt-14)给导航栏留位置 */}
-        <div className="pt-14 min-h-screen">
-          {children}
-        </div>
+      <body className={`${mono.variable} antialiased bg-[#0d0d0d] text-gray-300`}>
+        {children}
+        <Analytics /> {/* [新增] 插入组件，建议放在 body 最后 */}
       </body>
     </html>
   );
