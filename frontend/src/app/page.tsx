@@ -1,26 +1,40 @@
+"use client";
+
+import { useState } from "react";
+import dynamic from "next/dynamic"; // 1. 引入 dynamic
 import TerminalHero from "@/components/features/TerminalHero";
-// 1. 引入新的粒子组件
+import MobileLandingHero from "@/components/features/MobileLandingHero";
 import ParticleBackground from "@/components/layout/ParticleBackground";
 
+// 2. 动态导入 MobileMessenger，并关闭 SSR
+const MobileMessenger = dynamic(
+  () => import("@/components/features/MobileMessenger"),
+  { ssr: false } // 这就是魔法：彻底消除 Hydration Mismatch 和 setMounted 报错
+);
+
 export default function Home() {
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+
   return (
-    <main className="h-[calc(100vh-3.5rem)] w-full bg-[#050505] flex flex-col items-center justify-center relative overflow-hidden">
+    <main className="min-h-screen bg-black overflow-hidden relative">
+      <div className="fixed inset-0 z-0">
+        <ParticleBackground />
+      </div>
 
-      {/* 2. 使用粒子背景 */}
-      <ParticleBackground />
+      {/* Desktop View */}
+      <div className="hidden md:flex items-center justify-center min-h-screen relative z-10">
+        <TerminalHero />
+      </div>
 
-      {/* 3. 内容区域 (保持不变) */}
-      <div className="z-10 w-full px-4 max-w-4xl pointer-events-none">
-         <div className="pointer-events-auto">
-            <TerminalHero />
-         </div>
+      {/* Mobile View */}
+      <div className="block md:hidden relative z-10 h-[100dvh] w-full">
+        <MobileLandingHero onOpenTerminal={() => setIsMobileChatOpen(true)} />
 
-         <div className="mt-8 text-center select-none">
-            {/* 文字稍微改一下，配合星空主题 */}
-            <p className="text-gray-500/50 font-mono text-xs uppercase tracking-[0.3em] animate-pulse">
-               [ Neural Cloud: Connected ] • [ Nodes: 5000+ ]
-            </p>
-         </div>
+        {/* 这里直接使用动态加载的组件 */}
+        <MobileMessenger
+          isOpen={isMobileChatOpen}
+          onClose={() => setIsMobileChatOpen(false)}
+        />
       </div>
     </main>
   );

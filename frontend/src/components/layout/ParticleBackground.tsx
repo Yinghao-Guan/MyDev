@@ -40,7 +40,7 @@ function StarField(props: any) {
 
     // 视差效果 (反向跟随鼠标)
     const x = -state.mouse.x * 0.2;
-    const y = -state.mouse.y * 0.2;
+    const y = state.mouse.y * 0.2;
 
     ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, y, 0.1);
     ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, x, 0.1);
