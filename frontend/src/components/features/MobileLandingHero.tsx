@@ -10,19 +10,21 @@ interface MobileLandingHeroProps {
 
 export default function MobileLandingHero({ onOpenTerminal }: MobileLandingHeroProps) {
   return (
-    // [修改点]: h-[100dvh] + overflow-hidden 确保单页不滚动
-    // pt-20 是为了给顶部的 Navbar 留出视觉空间
-    <div className="flex flex-col h-[100dvh] w-full overflow-hidden bg-transparent relative z-10 pt-20 pb-safe">
+    // [修改 1]: 将 h-[100dvh] 改为 h-full
+    // 这样它会填满 page.tsx 传递给它的 h-[calc(100vh-3.5rem)] 空间
+    <div className="flex flex-col h-full w-full overflow-hidden bg-transparent relative z-10 pt-10 pb-safe">
+      {/* 注: 上面的 pt-20 可以稍微改小一点 (比如 pt-10)，因为现在整体高度变小了，避免内容太靠下 */}
 
-      {/* 中间主要内容区：使用 flex-1 占据剩余所有空间，并居中 */}
+      {/* 中间主要内容区 */}
       <div className="flex-1 flex flex-col items-center justify-center w-full px-6 text-center">
+        {/* ... 内容保持不变 ... */}
 
         {/* 1. 名字与头衔 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="space-y-3 mb-8" // 减小一点间距防止小屏手机挤
+          className="space-y-3 mb-8"
         >
           <h1 className="text-4xl font-bold text-white tracking-tight">
             Peter Guan
@@ -71,7 +73,7 @@ export default function MobileLandingHero({ onOpenTerminal }: MobileLandingHeroP
         </motion.button>
       </div>
 
-      {/* 4. 底部 System Status：固定在容器底部，不需滚动 */}
+      {/* 4. 底部 System Status */}
       <div className="shrink-0 py-6 text-center">
         <div className="text-[10px] text-gray-600 font-mono">
           System Status: <span className="text-green-500 animate-pulse">ONLINE</span>

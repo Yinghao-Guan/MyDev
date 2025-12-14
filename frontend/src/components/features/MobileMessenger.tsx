@@ -62,7 +62,7 @@ export default function MobileMessenger({ isOpen, onClose }: MobileMessengerProp
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          className="fixed inset-0 z-[99999] flex flex-col h-[100dvh] bg-black text-green-500 font-mono text-sm overflow-hidden"
+          className="fixed inset-0 z-[999] flex flex-col h-[100dvh] bg-black text-green-500 font-mono text-sm overflow-hidden"
         >
 
           {/* --- [A. 全屏特效层 (Matrix)] --- */}

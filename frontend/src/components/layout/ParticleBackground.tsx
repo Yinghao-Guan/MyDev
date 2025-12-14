@@ -1,18 +1,15 @@
-// src/components/layout/ParticleBackground.tsx
 "use client";
 
-import { useRef, useState, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
-// --- 手动生成球体分布粒子的函数 ---
-// 这能保证生成的 Float32Array 绝对干净，没有 NaN
+// --- 保持原本的粒子生成函数 ---
 function generateSpherePositions(count: number, radius: number) {
   const positions = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
-    // 使用球坐标系生成均匀分布的点
-    const r = radius * Math.cbrt(Math.random()); // 开立方根以保证球体内部均匀分布，而不是聚集在圆心
+    const r = radius * Math.cbrt(Math.random());
     const theta = Math.random() * 2 * Math.PI;
     const phi = Math.acos(2 * Math.random() - 1);
 
@@ -28,27 +25,50 @@ function generateSpherePositions(count: number, radius: number) {
 }
 
 function StarField(props: any) {
-  const ref = useRef<THREE.Points>(null!);
+  const pointsRef = useRef<THREE.Points>(null!);
+  const groupRef = useRef<THREE.Group>(null!);
 
-  // 使用 useMemo 替代 useState，性能更好，且确保只计算一次
+  // [新增]: 手动追踪鼠标位置
+  // 我们不使用 useFrame 自带的 state.mouse，因为 Canvas 被上层 UI (Terminal) 遮挡了
+  const mousePos = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      // 将坐标归一化到 -1 到 1 之间 (与 Three.js 标准坐标系一致)
+      mousePos.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mousePos.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
   const sphere = useMemo(() => generateSpherePositions(5000, 1.5), []);
 
   useFrame((state, delta) => {
-    // 自动旋转
-    ref.current.rotation.x -= delta / 10;
-    ref.current.rotation.y -= delta / 15;
+    // 1. 自动自转 (Points 层)
+    if (pointsRef.current) {
+      pointsRef.current.rotation.x -= delta / 10;
+      pointsRef.current.rotation.y -= delta / 15;
+    }
 
-    // 视差效果 (反向跟随鼠标)
-    const x = -state.mouse.x * 0.2;
-    const y = state.mouse.y * 0.2;
+    // 2. 鼠标交互 (Group 层)
+    // 这里改用我们自己的 mousePos.current
+    if (groupRef.current) {
+      const x = -mousePos.current.y * 0.15;
+      const y = mousePos.current.x * 0.15;
 
-    ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, y, 0.1);
-    ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, x, 0.1);
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, x, 0.1);
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, y, 0.1);
+    }
   });
 
   return (
-    <group rotation={[0, 0, Math.PI / 4]}>
-      <Points ref={ref} positions={sphere} stride={3} frustumCulled={false} {...props}>
+    <group ref={groupRef} rotation={[0, 0, Math.PI / 4]}>
+      <Points ref={pointsRef} positions={sphere} stride={3} frustumCulled={false} {...props}>
         <PointMaterial
           transparent
           color="#ffffff"
@@ -64,7 +84,9 @@ function StarField(props: any) {
 
 export default function ParticleBackground() {
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none bg-[#050505]">
+    // [CSS]: 既然我们用了全局监听，这里的 pointer-events-none 可以加回来
+    // 这样能确保背景绝对不会阻挡任何潜在的底层交互（虽然目前是底层）
+    <div className="absolute inset-0 z-0 bg-[#050505] pointer-events-none">
       <Canvas camera={{ position: [0, 0, 1] }} gl={{ antialias: false }}>
         <fog attach="fog" args={['#050505', 0.5, 2.5]} />
         <StarField />
