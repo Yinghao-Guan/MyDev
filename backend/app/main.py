@@ -8,7 +8,9 @@ from pydantic import BaseModel, Field, validator
 from dotenv import load_dotenv
 
 # --- [LangChain / Ollama Imports] (已恢复) ---
-from langchain_ollama import ChatOllama
+# from langchain_ollama import ChatOllama
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.messages import HumanMessage, SystemMessage
 
 # --- [Veru Services Imports] (注意 app. 前缀) ---
@@ -33,13 +35,20 @@ app = FastAPI(title="Peter Guan Portfolio API")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# 3. CORS
-origins = ["*"]  # 开发环境允许所有
+# CORS 配置
+# 生产环境配置
+origins = [
+    "http://localhost:3000",             # 本地开发必须保留
+    "https://peterguan.dev",             # 你的主域名
+    "https://www.peterguan.dev",         # WWW 子域名
+    "https://mydev.vercel.app", # 建议也加上 Vercel 分配的测试域名
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -53,24 +62,19 @@ class ChatRequest(BaseModel):
 
 
 def get_ai_model():
-    """获取 AI 模型实例 (支持 Ollama)"""
-    provider = os.getenv("AI_PROVIDER", "ollama")
+    """获取 AI 模型实例 (切换为 Gemini)"""
+    # 从 .env 获取你准备好的 DEV_API_KEY
+    api_key = os.getenv("DEV_API_KEY")
 
-    # 确保这里的 model 名称和你本地 ollama list 出来的一致
-    # 例如: llama3, llama3.1, mistral 等
-    model_name = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
-    base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    if not api_key:
+        print("[Warning] DEV_API_KEY not found. AI features may fail.")
 
-    if provider == "ollama":
-        print(f"[AI Init] Connecting to Ollama: {base_url} (Model: {model_name})")
-        return ChatOllama(
-            model=model_name,
-            base_url=base_url,
-            temperature=0.7
-        )
-    else:
-        # 默认回落
-        return ChatOllama(model="llama3")
+    return ChatGoogleGenerativeAI(
+        model="gemini-2.0-flash",
+        google_api_key=api_key,
+        temperature=0.7,
+        convert_system_message_to_human=True
+    )
 
 
 @app.post("/api/chat")
