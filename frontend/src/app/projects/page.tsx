@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Folder,
@@ -16,9 +16,9 @@ import {
   Cpu,
   BookOpen,
   MousePointerClick,
-  Github,       // [新增]
-  ExternalLink, // [新增]
-  Link as LinkIcon // [新增] 为了避免冲突，重命名 lucide 的 Link
+  Github,
+  ExternalLink,
+  Link as LinkIcon
 } from "lucide-react";
 import MemoizedMarkdown from "@/components/ui/MemoizedMarkdown";
 
@@ -31,17 +31,15 @@ type ProjectFile = {
   content?: string;
 };
 
-// [修改 1]: 扩展 Project 类型，包含链接信息
 type Project = {
   id: string;
   name: string;
-  github: string;     // 必填：所有项目都有 GitHub
-  live?: string;      // 选填：只有部分项目有 Live 网站
+  github: string;
+  live?: string;
   files: ProjectFile[];
 };
 
-// --- [Veru Content] ---
-// (保留之前的所有 Veru 相关常量内容，此处省略以节省空间，逻辑不变)
+// --- [Veru Content (保持不变)] ---
 const VERU_CORE_LOGIC = `import asyncio
 from services.openalex import search_openalex
 from services.semantic_scholar import search_s2
@@ -221,7 +219,6 @@ const PROJECTS: Project[] = [
   {
     id: "veru",
     name: "Veru_FactCheck",
-    // [修改 2]: 添加具体链接
     github: "https://github.com/Yinghao-Guan/Veru",
     live: "https://veru.app",
     files: [
@@ -234,9 +231,7 @@ const PROJECTS: Project[] = [
   {
     id: "mymd",
     name: "MyMD_Compiler",
-    // [修改 2]: 添加 GitHub 链接
     github: "https://github.com/Yinghao-Guan/MyMD",
-    // live: undefined (没有 Live)
     files: [
       { name: "Playground", type: "demo" },
       { name: "Grammar.g4", type: "code", language: "java", content: "// Grammar definition coming soon..." },
@@ -244,7 +239,7 @@ const PROJECTS: Project[] = [
   },
 ];
 
-// --- [Component] Veru Demo Interface ---
+// --- [Component] Veru Demo Interface (保持不变) ---
 type AuditItem = {
     citation_text: string;
     status: "REAL" | "FAKE" | "MISMATCH" | "SUSPICIOUS" | "UNVERIFIED";
@@ -378,16 +373,61 @@ const VeruDemo = () => {
   );
 };
 
+// 定义 Tab 类型
+type OpenedTab = {
+  projectId: string;
+  file: ProjectFile;
+};
 
 // --- [Main Page Component] ---
 export default function ProjectsPage() {
-  const [activeFile, setActiveFile] = useState<{ projectId: string; file: ProjectFile } | null>(null);
+  // [新状态]:
+  // 1. activeTab: 当前聚焦的 Tab (或 null)
+  // 2. openTabs: 所有已打开的 Tabs 数组
+  const [activeTab, setActiveTab] = useState<OpenedTab | null>(null);
+  const [openTabs, setOpenTabs] = useState<OpenedTab[]>([]);
 
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({ "veru": true, "mymd": false });
 
   const toggleFolder = (projectId: string) => setExpandedFolders(prev => ({ ...prev, [projectId]: !prev[projectId] }));
-  const openFile = (projectId: string, file: ProjectFile) => setActiveFile({ projectId, file });
 
+  // [新逻辑]: 打开文件
+  const openFile = (projectId: string, file: ProjectFile) => {
+    // 检查是否已存在
+    const existingTab = openTabs.find(t => t.projectId === projectId && t.file.name === file.name);
+
+    if (existingTab) {
+      // 存在 -> 切换过去
+      setActiveTab(existingTab);
+    } else {
+      // 不存在 -> 添加新 Tab 并切换
+      const newTab = { projectId, file };
+      setOpenTabs(prev => [...prev, newTab]);
+      setActiveTab(newTab);
+    }
+  };
+
+  // [新逻辑]: 关闭文件
+  const closeTab = (e: React.MouseEvent, tabToClose: OpenedTab) => {
+    e.stopPropagation();
+
+    // 1. 从列表中移除
+    const updatedTabs = openTabs.filter(t => t !== tabToClose);
+    setOpenTabs(updatedTabs);
+
+    // 2. 如果关闭的是当前 Tab，则需要计算新的 activeTab
+    if (activeTab === tabToClose) {
+      if (updatedTabs.length > 0) {
+        // 默认切换到最后一个 (VS Code 风格)
+        setActiveTab(updatedTabs[updatedTabs.length - 1]);
+      } else {
+        // 全关了 -> 回到空状态
+        setActiveTab(null);
+      }
+    }
+  };
+
+  // 获取文件图标的辅助函数
   const getFileIcon = (type: string, name: string) => {
     if (type === "readme") return <BookOpen size={14} className="text-blue-400" />;
     if (type === "markdown") return <FileText size={14} className="text-purple-400" />;
@@ -396,8 +436,8 @@ export default function ProjectsPage() {
     return <FileCode size={14} className="text-gray-400" />;
   };
 
-  // 辅助函数：根据 activeFile 找到对应的 Project 对象
-  const currentProject = activeFile ? PROJECTS.find(p => p.id === activeFile.projectId) : null;
+  // 计算当前 Project，用于右上角显示链接
+  const currentProject = activeTab ? PROJECTS.find(p => p.id === activeTab.projectId) : null;
 
   return (
     <div className="flex h-screen pt-14 text-sm font-mono overflow-hidden bg-[#0d0d0d] text-gray-300">
@@ -416,7 +456,7 @@ export default function ProjectsPage() {
             </div>
             {PROJECTS.map((project) => (
               <div key={project.id} className="mb-1">
-                {/* [位置 1]: Sidebar 上的链接 - Hover 显示 */}
+                {/* Sidebar Project Title */}
                 <div className="group flex items-center justify-between pr-2 rounded hover:bg-gray-800/50 cursor-pointer select-none">
                     <div onClick={() => toggleFolder(project.id)} className={`flex-1 flex items-center px-2 py-1.5 ${expandedFolders[project.id] ? 'text-gray-200' : 'text-gray-500'}`}>
                       {expandedFolders[project.id] ? <ChevronDown size={14} className="mr-1.5" /> : <ChevronRight size={14} className="mr-1.5" />}
@@ -424,7 +464,6 @@ export default function ProjectsPage() {
                       <span className="truncate">{project.name}</span>
                     </div>
 
-                    {/* 链接图标组：点击时阻止冒泡，避免触发折叠 */}
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {project.live && (
                             <a href={project.live} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-green-400" title="Live Demo">
@@ -440,12 +479,20 @@ export default function ProjectsPage() {
                 <AnimatePresence>
                   {expandedFolders[project.id] && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="ml-4 border-l border-gray-800 pl-1 overflow-hidden">
-                      {project.files.map((file) => (
-                        <div key={file.name} onClick={() => openFile(project.id, file)} className={`flex items-center px-2 py-1.5 cursor-pointer rounded mb-0.5 transition-colors select-none ${activeFile?.file.name === file.name && activeFile?.projectId === project.id ? "bg-green-900/20 text-green-400" : "hover:bg-gray-800 text-gray-400 hover:text-gray-200"}`}>
-                          <span className="mr-2 opacity-80">{getFileIcon(file.type, file.name)}</span>
-                          <span>{file.name}</span>
-                        </div>
-                      ))}
+                      {project.files.map((file) => {
+                        // 检查该文件是否在 activeTab，用于高亮显示
+                        const isActive = activeTab?.projectId === project.id && activeTab?.file.name === file.name;
+                        return (
+                          <div
+                            key={file.name}
+                            onClick={() => openFile(project.id, file)}
+                            className={`flex items-center px-2 py-1.5 cursor-pointer rounded mb-0.5 transition-colors select-none ${isActive ? "bg-green-900/20 text-green-400" : "hover:bg-gray-800 text-gray-400 hover:text-gray-200"}`}
+                          >
+                            <span className="mr-2 opacity-80">{getFileIcon(file.type, file.name)}</span>
+                            <span>{file.name}</span>
+                          </div>
+                        );
+                      })}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -457,21 +504,40 @@ export default function ProjectsPage() {
 
       {/* Main Stage */}
       <main className="flex-1 flex flex-col bg-[#0d0d0d] min-w-0">
-        {/* Tabs */}
-        <div className="h-9 bg-[#050505] border-b border-gray-800 flex items-center px-2 gap-1 overflow-x-auto no-scrollbar">
-          {activeFile ? (
-            <div className="bg-[#1e1e1e] border-t border-x border-gray-700 text-gray-200 px-3 py-1.5 text-xs flex items-center min-w-fit rounded-t-sm border-t-green-500 select-none h-full mt-1">
-              {getFileIcon(activeFile.file.type, activeFile.file.name)}
-              <span className="mx-2">{activeFile.file.name}</span>
-              <X size={12} className="ml-2 cursor-pointer hover:text-red-400" onClick={(e) => { e.stopPropagation(); setActiveFile(null); }} />
-            </div>
-          ) : <div className="text-gray-600 px-3 py-2 text-xs italic">No file open</div>}
 
-          {/* [位置 2]: 右上角 Context Links (当有文件打开时) */}
-          <div className="flex-1" /> {/* 占位符，把后面的内容推到最右边 */}
+        {/* [Multi-Tab Bar] */}
+        <div className="h-9 bg-[#050505] border-b border-gray-800 flex items-center px-0 gap-0 overflow-x-auto no-scrollbar select-none">
+
+          {/* Loop Render Open Tabs */}
+          {openTabs.map((tab, idx) => {
+            const isActive = activeTab === tab;
+            return (
+              <div
+                key={`${tab.projectId}-${tab.file.name}`}
+                onClick={() => setActiveTab(tab)}
+                className={`
+                  group relative flex items-center min-w-fit px-3 py-2 text-xs border-r border-gray-800 cursor-pointer transition-colors h-full mt-1
+                  ${isActive ? "bg-[#1e1e1e] text-gray-200 border-t border-t-green-500" : "bg-[#050505] text-gray-500 hover:bg-[#111] hover:text-gray-300"}
+                `}
+              >
+                <span className="mr-2">{getFileIcon(tab.file.type, tab.file.name)}</span>
+                <span>{tab.file.name}</span>
+                {/* Close Button: Always show on hover or if active */}
+                <span
+                  onClick={(e) => closeTab(e, tab)}
+                  className={`ml-2 p-0.5 rounded-sm hover:bg-gray-700 hover:text-white ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                >
+                  <X size={12} />
+                </span>
+              </div>
+            );
+          })}
+
+          {/* Context Links (Right Aligned) */}
+          <div className="flex-1 border-b border-gray-800 h-full" /> {/* Spacer */}
 
           {currentProject && (
-              <div className="flex items-center gap-3 px-3 h-full border-l border-gray-800/50 ml-2">
+              <div className="flex items-center gap-3 px-3 h-full border-l border-gray-800/50 bg-[#050505]">
                  <span className="hidden md:inline text-xs text-gray-600 mr-1">
                     {currentProject.name}
                  </span>
@@ -489,31 +555,31 @@ export default function ProjectsPage() {
           )}
         </div>
 
-        {/* Content Viewer */}
+        {/* Content Viewer (Controlled by activeTab) */}
         <div className="flex-1 overflow-hidden relative">
-          {activeFile?.file.type === "demo" && activeFile.projectId === "veru" ? (
+          {activeTab?.file.type === "demo" && activeTab.projectId === "veru" ? (
              <VeruDemo />
-          ) : activeFile?.file.content ? (
+          ) : activeTab?.file.content ? (
              <div className="h-full overflow-y-auto p-0">
-                {activeFile.file.type === "code" && (
+                {activeTab.file.type === "code" && (
                    <div className="p-6">
                       <div className="text-xs text-gray-500 mb-2 font-mono flex justify-between">
-                         <span>{activeFile.file.name}</span>
+                         <span>{activeTab.file.name}</span>
                          <span>ReadOnly</span>
                       </div>
                       <div className="bg-[#1e1e1e] p-4 rounded-lg border border-gray-800 overflow-x-auto shadow-2xl">
                          <pre className="text-sm font-mono leading-relaxed">
                            <code className="text-gray-300 language-python">
-                             {activeFile.file.content}
+                             {activeTab.file.content}
                            </code>
                          </pre>
                       </div>
                    </div>
                 )}
 
-                {(activeFile.file.type === "readme" || activeFile.file.type === "markdown") && (
+                {(activeTab.file.type === "readme" || activeTab.file.type === "markdown") && (
                    <div className="max-w-3xl mx-auto p-8 prose prose-invert prose-sm">
-                      <MemoizedMarkdown content={activeFile.file.content} />
+                      <MemoizedMarkdown content={activeTab.file.content} />
                    </div>
                 )}
              </div>
