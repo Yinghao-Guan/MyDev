@@ -14,7 +14,11 @@ import {
   Search,
   Activity,
   Cpu,
-  BookOpen
+  BookOpen,
+  MousePointerClick,
+  Github,       // [新增]
+  ExternalLink, // [新增]
+  Link as LinkIcon // [新增] 为了避免冲突，重命名 lucide 的 Link
 } from "lucide-react";
 import MemoizedMarkdown from "@/components/ui/MemoizedMarkdown";
 
@@ -27,14 +31,17 @@ type ProjectFile = {
   content?: string;
 };
 
+// [修改 1]: 扩展 Project 类型，包含链接信息
 type Project = {
   id: string;
   name: string;
+  github: string;     // 必填：所有项目都有 GitHub
+  live?: string;      // 选填：只有部分项目有 Live 网站
   files: ProjectFile[];
 };
 
 // --- [Veru Content] ---
-
+// (保留之前的所有 Veru 相关常量内容，此处省略以节省空间，逻辑不变)
 const VERU_CORE_LOGIC = `import asyncio
 from services.openalex import search_openalex
 from services.semantic_scholar import search_s2
@@ -214,16 +221,22 @@ const PROJECTS: Project[] = [
   {
     id: "veru",
     name: "Veru_FactCheck",
+    // [修改 2]: 添加具体链接
+    github: "https://github.com/Yinghao-Guan/Veru",
+    live: "https://veru.app",
     files: [
-      { name: "Live_Scanner_v1", type: "demo" },
-      { name: "hallucination_detector.py", type: "code", language: "python", content: VERU_CORE_LOGIC },
       { name: "README.md", type: "readme", content: VERU_README },
+      { name: "Live_Scanner_v1", type: "demo" },
       { name: "CASE_STUDY.md", type: "markdown", content: VERU_CASE_STUDY },
+      { name: "hallucination_detector.py", type: "code", language: "python", content: VERU_CORE_LOGIC },
     ]
   },
   {
     id: "mymd",
     name: "MyMD_Compiler",
+    // [修改 2]: 添加 GitHub 链接
+    github: "https://github.com/Yinghao-Guan/MyMD",
+    // live: undefined (没有 Live)
     files: [
       { name: "Playground", type: "demo" },
       { name: "Grammar.g4", type: "code", language: "java", content: "// Grammar definition coming soon..." },
@@ -368,10 +381,7 @@ const VeruDemo = () => {
 
 // --- [Main Page Component] ---
 export default function ProjectsPage() {
-  const [activeFile, setActiveFile] = useState<{ projectId: string; file: ProjectFile } | null>({
-    projectId: "veru",
-    file: PROJECTS[0].files[0]
-  });
+  const [activeFile, setActiveFile] = useState<{ projectId: string; file: ProjectFile } | null>(null);
 
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({ "veru": true, "mymd": false });
 
@@ -386,8 +396,10 @@ export default function ProjectsPage() {
     return <FileCode size={14} className="text-gray-400" />;
   };
 
+  // 辅助函数：根据 activeFile 找到对应的 Project 对象
+  const currentProject = activeFile ? PROJECTS.find(p => p.id === activeFile.projectId) : null;
+
   return (
-    // [修复 Logic]: h-screen + pt-14 确保占满屏幕且不被 Fixed Navbar 遮挡
     <div className="flex h-screen pt-14 text-sm font-mono overflow-hidden bg-[#0d0d0d] text-gray-300">
 
       {/* Sidebar */}
@@ -404,11 +416,27 @@ export default function ProjectsPage() {
             </div>
             {PROJECTS.map((project) => (
               <div key={project.id} className="mb-1">
-                <div onClick={() => toggleFolder(project.id)} className={`flex items-center px-2 py-1.5 cursor-pointer hover:bg-gray-800/50 rounded select-none ${expandedFolders[project.id] ? 'text-gray-200' : 'text-gray-500'}`}>
-                  {expandedFolders[project.id] ? <ChevronDown size={14} className="mr-1.5" /> : <ChevronRight size={14} className="mr-1.5" />}
-                  <Folder size={14} className={`mr-2 ${expandedFolders[project.id] ? "text-yellow-500" : "text-yellow-500/60"}`} />
-                  <span className="truncate">{project.name}</span>
+                {/* [位置 1]: Sidebar 上的链接 - Hover 显示 */}
+                <div className="group flex items-center justify-between pr-2 rounded hover:bg-gray-800/50 cursor-pointer select-none">
+                    <div onClick={() => toggleFolder(project.id)} className={`flex-1 flex items-center px-2 py-1.5 ${expandedFolders[project.id] ? 'text-gray-200' : 'text-gray-500'}`}>
+                      {expandedFolders[project.id] ? <ChevronDown size={14} className="mr-1.5" /> : <ChevronRight size={14} className="mr-1.5" />}
+                      <Folder size={14} className={`mr-2 ${expandedFolders[project.id] ? "text-yellow-500" : "text-yellow-500/60"}`} />
+                      <span className="truncate">{project.name}</span>
+                    </div>
+
+                    {/* 链接图标组：点击时阻止冒泡，避免触发折叠 */}
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {project.live && (
+                            <a href={project.live} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-green-400" title="Live Demo">
+                                <ExternalLink size={13} />
+                            </a>
+                        )}
+                        <a href={project.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-white" title="GitHub Repo">
+                            <Github size={13} />
+                        </a>
+                    </div>
                 </div>
+
                 <AnimatePresence>
                   {expandedFolders[project.id] && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="ml-4 border-l border-gray-800 pl-1 overflow-hidden">
@@ -430,14 +458,35 @@ export default function ProjectsPage() {
       {/* Main Stage */}
       <main className="flex-1 flex flex-col bg-[#0d0d0d] min-w-0">
         {/* Tabs */}
-        <div className="h-9 bg-[#050505] border-b border-gray-800 flex items-end px-2 gap-1 overflow-x-auto no-scrollbar">
+        <div className="h-9 bg-[#050505] border-b border-gray-800 flex items-center px-2 gap-1 overflow-x-auto no-scrollbar">
           {activeFile ? (
-            <div className="bg-[#1e1e1e] border-t border-x border-gray-700 text-gray-200 px-3 py-1.5 text-xs flex items-center min-w-fit rounded-t-sm border-t-green-500 select-none">
+            <div className="bg-[#1e1e1e] border-t border-x border-gray-700 text-gray-200 px-3 py-1.5 text-xs flex items-center min-w-fit rounded-t-sm border-t-green-500 select-none h-full mt-1">
               {getFileIcon(activeFile.file.type, activeFile.file.name)}
               <span className="mx-2">{activeFile.file.name}</span>
               <X size={12} className="ml-2 cursor-pointer hover:text-red-400" onClick={(e) => { e.stopPropagation(); setActiveFile(null); }} />
             </div>
           ) : <div className="text-gray-600 px-3 py-2 text-xs italic">No file open</div>}
+
+          {/* [位置 2]: 右上角 Context Links (当有文件打开时) */}
+          <div className="flex-1" /> {/* 占位符，把后面的内容推到最右边 */}
+
+          {currentProject && (
+              <div className="flex items-center gap-3 px-3 h-full border-l border-gray-800/50 ml-2">
+                 <span className="hidden md:inline text-xs text-gray-600 mr-1">
+                    {currentProject.name}
+                 </span>
+                 {currentProject.live && (
+                     <a href={currentProject.live} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-green-500 hover:text-green-300 transition-colors bg-green-900/20 px-2 py-1 rounded border border-green-900/50">
+                        <ExternalLink size={12} />
+                        <span className="font-bold">Live</span>
+                     </a>
+                 )}
+                 <a href={currentProject.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors hover:bg-gray-800 px-2 py-1 rounded">
+                    <Github size={12} />
+                    <span>Repo</span>
+                 </a>
+              </div>
+          )}
         </div>
 
         {/* Content Viewer */}
@@ -469,9 +518,16 @@ export default function ProjectsPage() {
                 )}
              </div>
           ) : (
-             <div className="flex flex-col items-center justify-center h-full text-gray-600 opacity-50 select-none">
-               <Cpu size={64} className="mb-4" />
-               <p>Select a module to engage.</p>
+             <div className="flex flex-col items-center justify-center h-full text-gray-600 select-none">
+               <div className="relative mb-6">
+                 <div className="absolute inset-0 bg-green-500/20 blur-xl rounded-full animate-pulse" />
+                 <Cpu size={64} className="relative z-10 text-gray-500" />
+               </div>
+               <h3 className="text-lg font-bold text-gray-400 mb-2">No File Selected</h3>
+               <div className="flex items-center text-sm text-gray-500 bg-gray-900/50 px-4 py-2 rounded border border-gray-800">
+                  <MousePointerClick size={16} className="mr-2 animate-bounce" />
+                  <span>Select a file from the <strong className="text-gray-300">EXPLORER</strong> to view details.</span>
+               </div>
              </div>
           )}
         </div>
