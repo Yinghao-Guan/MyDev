@@ -22,6 +22,9 @@ import {
 } from "lucide-react";
 import MemoizedMarkdown from "@/components/ui/MemoizedMarkdown";
 
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
 // --- [Data Structures] ---
 
 type ProjectFile = {
@@ -154,8 +157,8 @@ const VERU_CASE_STUDY = `# Case Study: Engineering Veru
 
 ### The "Stitched Hallucination" Problem
 During my research, I noticed a subtle but dangerous behavior in LLMs (ChatGPT/Claude). They often don't just invent papers; they **stitch** real citations with fake findings.
-* **Real Paper**: "Cellular Energy Dynamics" by Dr. Guan (2024).
-* **Fake Claim**: "This paper proves mitochondria are squares."
+* **Real Paper**: "Attention Is All You Need" by Ashish Vaswani et al. (2017).
+* **Fake Claim**: "The paper introduces a fully convolutional sequence-to-sequence model with attention, enabling parallel training and achieving competitive or state-of-the-art results on WMT machine translation benchmarks." (actually from “Convolutional Sequence to Sequence Learning” by Gehring et al. (2017)）
 
 **The Gap in Existing Tools**:
 Most citation checkers only verify **Existence** (Does this title/author exist?). They fail to verify **Content Consistency** (Does the paper actually support the claim?).
@@ -177,6 +180,7 @@ We launch requests to OpenAlex and Semantic Scholar in parallel. The system prio
 
 ### AsyncIO & Performance
 **Challenge**: Batch processing citations sequentially was prohibitively slow.
+
 **Solution**: Implemented Python \`asyncio\`.
 * **Before**: Linear blocking. 5 citations ≈ 15s+.
 * **After**: Concurrent execution. 5 citations ≈ 2-3s.
@@ -567,13 +571,22 @@ export default function ProjectsPage() {
                          <span>{activeTab.file.name}</span>
                          <span>ReadOnly</span>
                       </div>
-                      <div className="bg-[#1e1e1e] p-4 rounded-lg border border-gray-800 overflow-x-auto shadow-2xl">
-                         <pre className="text-sm font-mono leading-relaxed">
-                           <code className="text-gray-300 language-python">
-                             {activeTab.file.content}
-                           </code>
-                         </pre>
-                      </div>
+                      <SyntaxHighlighter
+                          style={vscDarkPlus} // 应用 VSC Dark Plus 主题
+                          language={activeTab.file.language || 'text'} // 使用文件定义的语言，如 'python'
+                          PreTag="div" // 使用 div 作为容器
+                          customStyle={{
+                              margin: 0,
+                              borderRadius: '8px',
+                              background: '#1e1e1e', // 匹配原有的背景色
+                              border: '1px solid #333',
+                              fontSize: '0.9em',
+                              padding: '1rem',
+                              lineHeight: '1.4'
+                          }}
+                      >
+                          {activeTab.file.content ? String(activeTab.file.content).replace(/\n$/, '') : ''}
+                      </SyntaxHighlighter>
                    </div>
                 )}
 
