@@ -4,7 +4,11 @@ import { Terminal, Cpu, Shield, Globe } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#0d0d0d] text-gray-300 font-mono p-8 flex items-center justify-center">
+    // [修复 Logic]:
+    // 1. h-screen: 强制全屏
+    // 2. pt-14: 避让顶部导航
+    // 3. overflow-hidden: 避免出现双滚动条（内容区若溢出由卡片内部控制，或者保持卡片居中不滚动）
+    <div className="h-screen pt-14 bg-[#0d0d0d] text-gray-300 font-mono p-8 flex items-center justify-center overflow-hidden">
       <div className="max-w-2xl w-full border border-gray-800 bg-[#050505] rounded-lg shadow-2xl overflow-hidden relative">
 
         {/* Header */}

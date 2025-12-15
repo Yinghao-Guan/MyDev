@@ -24,7 +24,7 @@ type ProjectFile = {
   name: string;
   type: "readme" | "demo" | "code" | "markdown";
   language?: string;
-  content?: string; // 确保这里有 content 字段
+  content?: string;
 };
 
 type Project = {
@@ -77,7 +77,6 @@ async def audit_citation(citation: Citation) -> AuditResult:
     return verdict
 `;
 
-// [更新]: 使用你提供的最新版 README
 const VERU_README = `# Veru: AI Citation Auditor
 
 > **Verify ChatGPT/Claude citations against real academic databases instantly.**
@@ -233,7 +232,6 @@ const PROJECTS: Project[] = [
 ];
 
 // --- [Component] Veru Demo Interface ---
-// (这部分保持不变，为了节省空间我只保留函数签名，请保留你之前文件中完整的 VeruDemo 代码)
 type AuditItem = {
     citation_text: string;
     status: "REAL" | "FAKE" | "MISMATCH" | "SUSPICIOUS" | "UNVERIFIED";
@@ -301,7 +299,6 @@ const VeruDemo = () => {
     }
   };
 
-  // Helper: Highlight Text
   const renderHighlightedText = () => {
     if (auditResults.length === 0) return <p className="text-gray-300 leading-relaxed">{inputText}</p>;
     let content = inputText;
@@ -373,7 +370,7 @@ const VeruDemo = () => {
 export default function ProjectsPage() {
   const [activeFile, setActiveFile] = useState<{ projectId: string; file: ProjectFile } | null>({
     projectId: "veru",
-    file: PROJECTS[0].files[0] // Default to Live_Scanner
+    file: PROJECTS[0].files[0]
   });
 
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({ "veru": true, "mymd": false });
@@ -390,7 +387,8 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] text-sm font-mono overflow-hidden bg-[#0d0d0d] text-gray-300">
+    // [修复 Logic]: h-screen + pt-14 确保占满屏幕且不被 Fixed Navbar 遮挡
+    <div className="flex h-screen pt-14 text-sm font-mono overflow-hidden bg-[#0d0d0d] text-gray-300">
 
       {/* Sidebar */}
       <aside className="w-64 border-r border-gray-800 bg-[#050505] flex flex-col shrink-0">
@@ -444,13 +442,10 @@ export default function ProjectsPage() {
 
         {/* Content Viewer */}
         <div className="flex-1 overflow-hidden relative">
-          {/* [修正点]: 这里的判断逻辑 activeFile?.file.content 才是正确的，之前漏了 .file */}
           {activeFile?.file.type === "demo" && activeFile.projectId === "veru" ? (
              <VeruDemo />
           ) : activeFile?.file.content ? (
-             // Content Renderer for Code/Markdown
              <div className="h-full overflow-y-auto p-0">
-                {/* 如果是代码文件 */}
                 {activeFile.file.type === "code" && (
                    <div className="p-6">
                       <div className="text-xs text-gray-500 mb-2 font-mono flex justify-between">
@@ -460,7 +455,6 @@ export default function ProjectsPage() {
                       <div className="bg-[#1e1e1e] p-4 rounded-lg border border-gray-800 overflow-x-auto shadow-2xl">
                          <pre className="text-sm font-mono leading-relaxed">
                            <code className="text-gray-300 language-python">
-                             {/* [修正点]: 这里也需要加上 .file */}
                              {activeFile.file.content}
                            </code>
                          </pre>
@@ -468,10 +462,8 @@ export default function ProjectsPage() {
                    </div>
                 )}
 
-                {/* 如果是 Readme / Markdown */}
                 {(activeFile.file.type === "readme" || activeFile.file.type === "markdown") && (
                    <div className="max-w-3xl mx-auto p-8 prose prose-invert prose-sm">
-                      {/* [修正点]: 这里也需要加上 .file */}
                       <MemoizedMarkdown content={activeFile.file.content} />
                    </div>
                 )}
