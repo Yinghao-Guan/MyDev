@@ -26,7 +26,10 @@ export default function ProjectsPage() {
   const [openTabs, setOpenTabs] = useState<OpenedTab[]>([]);
   // 默认展开所有文件夹，方便查看
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
-      "veru": true, "gradecalc": true, "mymd": false
+      "veru": true,
+      "realibuddy": true,
+      "gradecalc": false,
+      "mymd": false
   });
 
   const toggleFolder = (projectId: string) => setExpandedFolders(prev => ({ ...prev, [projectId]: !prev[projectId] }));
