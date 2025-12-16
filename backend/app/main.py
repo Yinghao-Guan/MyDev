@@ -64,6 +64,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# === 安全拦截词列表 ===
+FORBIDDEN_PHRASES = [
+    "system prompt",
+    "ignore previous instructions",
+    "ignore all previous instructions",
+    "show me your instructions",
+    "show me the instructions",
+    "what are your instructions",
+    "original prompt",
+    "initial prompt",
+    "developer mode",
+]
+
 
 # ==========================================
 # Part 1: Chat / Portfolio Logic
@@ -92,6 +105,19 @@ def get_ai_model():
 @app.post("/api/chat")
 async def chat_endpoint(request: ChatRequest):
     """主页终端对话接口 (流式)"""
+    # === 安全检查 Guardrail ===
+    # 将用户输入转为小写进行检查
+    user_input_lower = request.message.lower()
+
+    # 检查是否包含由于恶意意图的关键词
+    for phrase in FORBIDDEN_PHRASES:
+        if phrase in user_input_lower:
+            # 如果发现敏感词，直接返回拒绝信息，不调用 LLM
+            async def deny_response():
+                yield "ACCESS DENIED: Security Protocol Activated. Restricted access to core system instructions."
+
+            return StreamingResponse(deny_response(), media_type="text/event-stream")
+
     model = get_ai_model()
 
     # 获取系统提示词 (包含简历数据)
