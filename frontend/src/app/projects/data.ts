@@ -319,6 +319,17 @@ const REALIBUDDY_README = `# RealiBuddy: The Real-Time AI Lie Detector
 > **🏆 "Best AI/ML Award" Winner @ HackCC Hackathon**
 > *Refactored v2.0: Portfolio Edition (Pure Software & Simulation)*
 
+## 🏆 The Original Team
+This project originates from a 4-person team effort at HackCC.
+While this v2.0 is a solo refactor for demonstration, the core concept and original UI design belong to the team:
+
+* **[Sean Esla](https://github.com/seanesla)** - Original Frontend & UI Lead
+* **[Justin Alexander](https://github.com/juhsztn)** - Product Documentation & Pitch
+* **[Aung Min Khant](https://www.linkedin.com/in/real-aungminkhant/)** - Concept Ideation & Strategy
+* **Peter Guan** - Full Stack Refactor (v2.0) & Original Backend Logic
+
+> *Note: The UI in this portfolio version is a React reimplementation faithfully recreating the original design by Sean Esla.*
+
 ## 💡 The Concept
 RealiBuddy began as a wild Hackathon experiment: an AI that literally **shocked** you (via a Pavlok wearable) when you lied.
 **Version 2.0** is a complete architectural rewrite designed for the web. It preserves the "cyberpunk interrogation" soul of the original but decouples it from proprietary hardware and expensive enterprise APIs, transforming it into a seamless, browser-based demonstration of prompt engineering and modern web architecture.
@@ -363,7 +374,20 @@ const REALIBUDDY_CASE_STUDY = `# Case Study: RealiBuddy (Evolution)
 > **Origin**: "Best AI/ML Award" Winner @ HackCC
 > **Status**: Refactored for Web (v2.0)
 
-## 1. The "De-Engineering" Philosophy
+## 1. The Pivot: Why Refactor?
+
+### Escaping "Dependency Hell"
+The original v1.0 was a hardware-integrated prototype relying on a teammate's **Pavlok** shock bracelet and enterprise API keys (Deepgram, Perplexity) that were no longer active. To preserve the project as a live portfolio piece, I had to make a hard pivot.
+
+### The Migration Strategy
+I established three core goals for v2.0:
+1.  **Sustainability**: Replace pay-per-use APIs with **Gemini 2.0 Flash** (Cost-efficient & Smart).
+2.  **Simulation**: Replace physical hardware shocks with **Visual/Audio feedback loops** to mimic the original experience in a browser.
+3.  **Modernization**: Migrate from a messy jQuery script to a type-safe **Next.js/React** architecture.
+
+---
+
+## 2. The "De-Engineering" Philosophy
 
 ### Breaking the "Complexity Addiction"
 Hackathons often reward complexity—WebSockets, binary streams, and microservices are seen as "cool." However, when porting RealiBuddy for my portfolio, I realized that complexity is a liability for longevity.
@@ -377,7 +401,7 @@ By simplifying the architecture, I reduced the "Time to First Byte" (TTFB) and e
 
 ---
 
-## 2. The Logic Challenge: "The People Pleaser" Problem
+## 3. The Logic Challenge: "The People Pleaser" Problem
 
 ### Fighting LLM Politeness
 During the transition from Perplexity (Search) to Gemini (Reasoning), I encountered an unexpected behavioral issue: **The AI was too polite.**
@@ -391,7 +415,7 @@ A lie detector cannot be diplomatic. I had to engineer a **"Ruthless Persona"** 
 
 ---
 
-## 3. The Frontend Challenge: The "Ship of Theseus"
+## 4. The Frontend Challenge: The "Ship of Theseus"
 
 ### Porting Chaos to Order
 The original v1.0 UI was "Spaghetti Code"—a single JavaScript file manipulating the DOM directly to create cyberpunk particle effects and glitches.
@@ -404,7 +428,7 @@ The challenge in v2.0 was **porting this visual chaos into React's strict compon
 
 ---
 
-## 4. Final Reflections
+## 5. Final Reflections
 
 ### From "Shock Value" to "Software Value"
 RealiBuddy started as a hardware prank—shocking people for fun. By stripping away the hardware (Pavlok) and the expensive APIs (Deepgram), I was forced to rely on pure software engineering to deliver the same impact.
