@@ -170,9 +170,9 @@ Stack: Python, Next.js, C++, Haskell, PyTorch
 ├── about/
 └── projects/
     ├── Veru
-    ├── MyMD
-    ├── Emotional_Support_Agent
-    └── peterguan.dev
+    ├── RealiBuddy
+    ├── GradeCalc
+    └── MyMD
       `;
       setHistory((prev) => [...prev, { role: "system", content: treeOutput.trim() }]);
       return;
