@@ -313,6 +313,127 @@ I chose the Bento Grid layout not just for aesthetics, but for **Mobile Responsi
 * **User Feedback**: Friends who used it found the "Advice" feature surprisingly grounding. It transformed a tool they thought they didn't need into something they now rely on.
 `;
 
+// RealiBuddy
+const REALIBUDDY_README = `# Realibuddy: The AI Truth Sentinel
+
+> **An AI companion that listens to your conversations and fact-checks them in real-time.**
+> *Refactored v2.0: Pure Software Edition (No Hardware Required)*
+
+## 💡 The Concept
+Realibuddy was originally built at a Hackathon to shock users (literally, via a Pavlok bracelet) when they told a lie.
+**Version 2.0** pivots from "Negative Reinforcement" to "Augmented Intelligence". It acts as a second brain, silently verifying claims made during meetings, debates, or casual chats.
+
+## 🛠 Tech Stack (v2.0)
+* **Brain**: Google Gemini 2.0 Flash (Replaces Perplexity)
+* **Ears**: Web Speech API (Moved from Backend Deepgram to Frontend)
+* **Grounding**: Google Search Tool (Built-in Gemini functionality)
+* **Backend**: Node.js + WebSocket
+
+## 🚀 How it Works
+1.  **Listen**: The frontend uses the browser's native STT to capture speech.
+2.  **Process**: Text is streamed to the Node.js backend via WebSocket.
+3.  **Audit**:
+    * Gemini 2.0 analyzes the claim.
+    * If the claim is factual (e.g., "The population of Mars is 1 billion"), it triggers a **Google Search**.
+    * It compares the claim against search results using a strict "Evidence Schema".
+4.  **Feedback**: The frontend displays a "Truth Score" and citation overlay.
+
+## ⚖️ The "Nuance" Algorithm
+Fact-checking isn't just True/False. Realibuddy handles nuance:
+* **Subjective**: "I love pizza" → *Unverifiable* (Ignored)
+* **Outdated**: "The Queen of England is alive" → *False* (Checks current date)
+* **Approximate**: "It costs about 50 bucks" → *True* (If actual is 49.99)
+`;
+
+const REALIBUDDY_GEMINI_SERVICE = `import { GoogleGenAI } from '@google/genai';
+import { GEMINI_API_KEY } from '../utils/config.js';
+
+export class GeminiService {
+    private client: GoogleGenAI;
+
+    constructor() {
+        this.client = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    }
+
+    async checkFact(claim: string): Promise<FactCheckResult> {
+        // 1. Context Awareness
+        const now = new Date();
+        const currentDateTime = now.toLocaleString('en-US', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
+
+        // 2. The "Strict" System Prompt (Migrated from Perplexity)
+        const systemPrompt = "You are a forensic fact-checker.
+            CRITICAL CONTEXT:
+            - Current Date: \${currentDateTime}
+            
+            RULES:
+            1. **Subjectivity**: Opinions ("I think...", "It's ugly") are UNVERIFIABLE.
+            2. **Recency**: Use Google Search for ANY event in the last 12 months.
+            3. **Strictness**: If a user gets a specific date/number wrong, it is FALSE.
+               - Claim: "Titanic sank in 1915" -> FALSE (It was 1912).
+            4. **Hallucination Prevention**: If you cannot find a source, return "unverifiable".
+            
+            RESPONSE FORMAT (JSON):
+            {
+              "verdict": "true" | "false" | "unverifiable",
+              "confidence": 0.0-1.0,
+              "evidence": "Brief correction with [Source Name] citation."
+            }";
+
+        // 3. Call Gemini with Search Tool
+        const response = await this.client.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: [
+                { role: 'user', parts: [{ text: systemPrompt }, { text: \`Verify: "\${claim}"\` }] }
+            ],
+            config: {
+                tools: [{ google_search: {} }], // Native Search Grounding
+                responseMimeType: 'application/json'
+            }
+        });
+
+        return JSON.parse(response.text());
+    }
+}
+`;
+
+const REALIBUDDY_HANDLER = `import { WebSocket } from 'ws';
+import { GeminiService } from '../services/gemini.js';
+
+// Cleaned up Handler: No Pavlok, No Deepgram, Just Logic.
+export function handleConnection(ws: WebSocket) {
+    const gemini = new GeminiService();
+
+    console.log('Client connected for Truth Audit...');
+
+    ws.on('message', async (data) => {
+        try {
+            // Expecting simplified JSON: { type: "claim", text: "..." }
+            const msg = JSON.parse(data.toString());
+
+            if (msg.type === 'claim') {
+                // 1. Notify client: Thinking...
+                ws.send(JSON.stringify({ type: 'status', status: 'analyzing' }));
+
+                // 2. Perform Audit
+                const result = await gemini.checkFact(msg.text);
+
+                // 3. Send Verdict
+                ws.send(JSON.stringify({
+                    type: 'result',
+                    verdict: result.verdict,
+                    confidence: result.confidence,
+                    evidence: result.evidence
+                }));
+            }
+        } catch (error) {
+            ws.send(JSON.stringify({ type: 'error', message: error.message }));
+        }
+    });
+}
+`;
+
 // --- Projects Configuration ---
 export const PROJECTS: Project[] = [
   {
@@ -337,6 +458,17 @@ export const PROJECTS: Project[] = [
       { name: "App_Preview_v1", type: "demo" },
       { name: "CASE_STUDY.md", type: "markdown", content: GRADECALC_CASE_STUDY },
       { name: "advice_algorithm.js", type: "code", language: "javascript", content: GRADECALC_LOGIC },
+    ]
+  },
+  {
+    id: "realibuddy",
+    name: "RealiBuddy",
+    github: "https://github.com/seanesla/Realibuddy", // 替换为你的真实链接
+    files: [
+      { name: "README.md", type: "readme", content: REALIBUDDY_README },
+      { name: "Live_Interface", type: "demo" },
+      { name: "fact_checker.ts", type: "code", language: "typescript", content: REALIBUDDY_GEMINI_SERVICE },
+      { name: "socket_handler.ts", type: "code", language: "typescript", content: REALIBUDDY_HANDLER },
     ]
   },
   {

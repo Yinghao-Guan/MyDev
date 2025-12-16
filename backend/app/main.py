@@ -7,13 +7,13 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, validator
 from dotenv import load_dotenv
 
-# --- [LangChain / Ollama Imports] (已恢复) ---
+# --- [LangChain / Ollama Imports] ---
 # from langchain_ollama import ChatOllama
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.messages import HumanMessage, SystemMessage
 
-# --- [Veru Services Imports] (注意 app. 前缀) ---
+# --- [Veru Services Imports] ---
 from app.services.llm_extractor import extract_citations_from_text
 from app.services.openalex import search_paper_on_openalex
 from app.services.google_search import verify_with_google_search
@@ -25,6 +25,9 @@ from app.data import get_system_prompt
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+
+# --- realibuddy ---
+from app.services.realibuddy import realibuddy_service
 
 # 1. Load Env
 load_dotenv()
@@ -211,9 +214,26 @@ async def audit_citations(request: Request, body: AuditRequest):
     return StreamingResponse(result_generator(), media_type="application/x-ndjson")
 
 
+# ==========================================
+# Part 3: Realibuddy Logic (新增)
+# ==========================================
+
+class ClaimRequest(BaseModel):
+    text: str
+    source_filter: str = "all"
+
+@app.post("/api/realibuddy/audit")
+async def realibuddy_audit(request: ClaimRequest):
+    """
+    Realibuddy 事实核查接口 (支持来源过滤)
+    """
+    print(f"Realibuddy checking ({request.source_filter}): {request.text}")
+    # 传递 source_filter
+    result = await realibuddy_service.verify_claim(request.text, request.source_filter)
+    return result
+
 if __name__ == "__main__":
     import uvicorn
-    import os
-
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
+

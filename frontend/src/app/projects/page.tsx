@@ -13,7 +13,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 // [Refactor] 引入拆分后的数据和组件
 import { PROJECTS, Project, ProjectFile } from "./data";
 import VeruDemo from "./components/VeruDemo";
-// import RealibuddyDemo from "./components/RealibuddyDemo"; // 未来我们会加这个
+import RealibuddyDemo from "./components/RealibuddyDemo";
 
 // 定义 Tab 类型
 type OpenedTab = {
@@ -89,6 +89,8 @@ export default function ProjectsPage() {
           switch (projectId) {
               case "veru":
                   return <VeruDemo />;
+              case "realibuddy":
+                  return <RealibuddyDemo />;
               case "gradecalc":
                   return (
                     <div className="w-full h-full bg-[#F5F5F7]">
