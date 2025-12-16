@@ -29,22 +29,31 @@ from slowapi.errors import RateLimitExceeded
 # --- realibuddy ---
 from app.services.realibuddy import realibuddy_service
 
-# 1. Load Env
+# Load Env
 load_dotenv()
 
-# 2. Init App & Limiter
+# Init App & Limiter
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="Peter Guan Portfolio API")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# === 唤醒/健康检查接口 ===
+@app.get("/api/health")
+async def health_check():
+    """
+    轻量级接口，用于唤醒 Render 实例。
+    不包含任何复杂逻辑或外部 API 调用。
+    """
+    return {"status": "awake", "message": "Ready to serve"}
+
 # CORS 配置
 # 生产环境配置
 origins = [
     "http://localhost:3000",             # 本地开发必须保留
-    "https://peterguan.dev",             # 你的主域名
+    "https://peterguan.dev",             # 主域名
     "https://www.peterguan.dev",         # WWW 子域名
-    "https://my-dev.vercel.app", # 建议也加上 Vercel 分配的测试域名
+    "https://my-dev.vercel.app", # Vercel 分配的测试域名
 ]
 
 app.add_middleware(
@@ -57,7 +66,7 @@ app.add_middleware(
 
 
 # ==========================================
-# Part 1: Chat / Portfolio Logic (已修复)
+# Part 1: Chat / Portfolio Logic
 # ==========================================
 
 class ChatRequest(BaseModel):
@@ -66,7 +75,7 @@ class ChatRequest(BaseModel):
 
 def get_ai_model():
     """获取 AI 模型实例 (切换为 Gemini)"""
-    # 从 .env 获取你准备好的 DEV_API_KEY
+    # 从 .env 获取 DEV_API_KEY
     api_key = os.getenv("DEV_API_KEY")
 
     if not api_key:
@@ -215,7 +224,7 @@ async def audit_citations(request: Request, body: AuditRequest):
 
 
 # ==========================================
-# Part 3: Realibuddy Logic (新增)
+# Part 3: Realibuddy Logic
 # ==========================================
 
 class ClaimRequest(BaseModel):

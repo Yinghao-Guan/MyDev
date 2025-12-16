@@ -3,6 +3,7 @@ import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import { Analytics } from "@vercel/analytics/react";
+import BackendAwakener from "@/components/features/BackendAwakener";
 
 export const metadata: Metadata = {
   title: "Peter Guan | Digital Cortex",
@@ -31,11 +32,11 @@ export const metadata: Metadata = {
   },
 };
 
+// 字体配置
 const mono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
 });
-
 
 export default function RootLayout({
   children,
@@ -45,6 +46,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${mono.variable} antialiased bg-[#0d0d0d] text-gray-300`}>
+        {/* 唤醒器 */}
+        <BackendAwakener />
+
         <Navbar />
 
         {/* 页面内容 */}
