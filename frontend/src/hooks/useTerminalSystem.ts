@@ -8,7 +8,7 @@ export type Message = {
   isLogo?: boolean; // 新增：专门用于标记 Logo，防止误伤 cowsay
 };
 
-// ... (generateCowsay 保持不变) ...
+// generateCowsay
 const generateCowsay = (text: string) => {
   const len = text.length;
   const line = "-".repeat(len + 2);
@@ -125,7 +125,7 @@ These shell commands are defined internally. Type 'help' to see this list.
       return;
     }
 
-    // [Whoami] - 硬核身份卡
+    // [Whoami] - 身份卡
     if (mainCommand === "whoami") {
         setHistory((prev) => [...prev, { role: "user", content: input }]);
         const bio = `
@@ -149,7 +149,7 @@ Stack: Python, Next.js, C++, Haskell, PyTorch
     }
 
     // [Restricted]
-    const restrictedCommands = ["mkdir", "touch", "rm", "rmdir", "cp", "mv", "chmod", "chown", "sudo", "nano", "vim"];
+    const restrictedCommands = ["mkdir", "touch", "rm", "rmdir", "cp", "mv", "chmod", "chown", "sudo", "nano", "vim", "ifconfig"];
     if (restrictedCommands.includes(mainCommand)) {
       setHistory((prev) => [...prev, { role: "user", content: input }]);
       const msg = mainCommand === "sudo"
