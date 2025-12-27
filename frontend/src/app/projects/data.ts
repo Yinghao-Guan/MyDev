@@ -342,29 +342,27 @@ RealiBuddy began as a wild Hackathon experiment: an AI that literally **shocked*
 * **Visuals**: Custom Canvas Hooks (Particle Animation)
 
 ## 🔄 Architecture Evolution: Why v2.0?
-This project demonstrates the ability to "port and refactor" a complex hardware prototype into a scalable web application.
+This version demonstrates the transition from a hardware prototype to a production-ready Web Agent.
 
-| Feature | Hackathon Origin (v1.0) | Portfolio Demo (v2.0) | Engineering Decision |
-| :--- | :--- | :--- | :--- |
-| **Logic** | Real-time Web Search (Perplexity) | **Prompt Engineering (Gemini)** | Switched to "Roleplay Mode" to simulate verification styles (Academic/News) without API latency. |
-| **I/O** | Binary Stream (WebSocket) | **REST API (HTTP)** | Simplified communication protocol for better stability in a static demo environment. |
-| **Feedback** | Physical Shock (Pavlok IoT) | **Visual & Audio Cues** | Replaced physical punishment with UI feedback loops (Red Alert/Green Pass) for accessibility. |
-| **Cost** | Enterprise APIs | **Gemini API Paid Tier 1** | Optimized for sustainability using browser-native capabilities and efficient LLM inference. |
+| Feature | Hackathon Origin (v1.0) | Portfolio Demo (v2.0) |
+| :--- | :--- | :--- |
+| **Verification** | Perplexity API (External Search) | **Gemini + Google Search Tool** |
+| **Logic** | Static Knowledge base | **Live Grounding (RAG)** |
+| **I/O** | WebSocket Binary Stream | **Optimized REST + Web Speech API** |
+| **Feedback** | Physical Shock (Pavlok IoT) | **Visual & Audio Alert System** |
 
-## 🚀 How it Works
-1.  **Listen**: The browser's native \`SpeechRecognition\` captures audio locally (no server upload required).
-2.  **Analyze**: Text is sent to the Python backend via a lightweight REST endpoint.
-3.  **Simulate**:
-    * Gemini 2.0 receives the claim with a specific **System Persona** (e.g., "Skeptical Fact-Checker").
-    * Instead of browsing the live web, it leverages its massive internal knowledge base to hallucinate a "Verdict" based on general consensus.
-4.  **Feedback**: The React frontend interprets the JSON verdict to trigger specific CSS animations and synthesized speech responses.
+## 🚀 How it Works (The Audit Pipeline)
+1.  **Listen**: The browser's native \`SpeechRecognition\` captures audio locally.
+2.  **Verify (The Core)**: The statement is sent to the FastAPI backend. Unlike traditional LLMs, the system triggers **Gemini 2.0's Google Search Tool**.
+3.  **Cross-Reference**: The AI performs a multi-step search query to verify the claim against the most recent web data (News, Academic, or Official sources).
+4.  **Adjudicate**: Gemini interprets the search results and generates a JSON verdict:
+    * **TRUE**: Statement aligns with grounded search data.
+    * **FALSE**: Mismatch detected between claim and reality.
+    * **UNVERIFIABLE**: Insufficient data found on the live web.
+5.  **Feedback**: The UI triggers high-frequency canvas animations and synthesized speech feedback based on the verdict.
 
 ## ⚖️ The "Nuance" Engine
-Since we removed live web search, v2.0 relies on sophisticated **Prompt Engineering** to categorize intent:
-* **Subjective**: "I think this is cool." -> *Ignored*
-* **Factual Lie**: "Humans have three legs." -> *False (High Confidence)*
-* **Historical Fact**: "The Titanic sank in 1912." -> *True*
-* **Roleplay**: The AI validates sources by "pretending" to cite authoritative domains (e.g., .edu or .gov) based on the context of the claim.
+By integrating **Google Search Grounding**, v2.0 solves the "Recency Problem" that plagues standard LLMs. Whether it's yesterday's news or a specific historical date, the system provides forensic-level verification with cited evidence.
 `;
 
 const REALIBUDDY_CASE_STUDY = `# Case Study: RealiBuddy (Evolution)
@@ -774,7 +772,7 @@ SPACE : [ \\t]+ ;`
 export const PROJECTS: Project[] = [
   {
     id: "veru",
-    name: "Veru_FactCheck",
+    name: "Veru_CitationAuditor",
     github: "https://github.com/Yinghao-Guan/Veru",
     live: "https://veru.app",
     files: [
@@ -786,7 +784,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "realibuddy",
-    name: "RealiBuddy",
+    name: "RealiBuddy_FactCheck",
     github: "https://github.com/seanesla/Realibuddy",
     files: [
       { name: "README.md", type: "readme", content: REALIBUDDY_README },
