@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Folder, FileCode, FileText, ChevronRight, ChevronDown, Play,
@@ -9,13 +10,10 @@ import {
 import MemoizedMarkdown from "@/components/ui/MemoizedMarkdown";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-
-// [Refactor] 引入拆分后的数据和组件
 import { PROJECTS, Project, ProjectFile } from "./data";
 import VeruDemo from "./components/VeruDemo";
 import RealibuddyDemo from "./components/RealibuddyDemo";
 
-// 定义 Tab 类型
 type OpenedTab = {
   projectId: string;
   file: ProjectFile;
@@ -24,13 +22,60 @@ type OpenedTab = {
 export default function ProjectsPage() {
   const [activeTab, setActiveTab] = useState<OpenedTab | null>(null);
   const [openTabs, setOpenTabs] = useState<OpenedTab[]>([]);
-  // 默认展开所有文件夹，方便查看
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
       "veru": true,
       "realibuddy": true,
       "gradecalc": false,
       "mymd": false
   });
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const pId = searchParams.get("project");
+    const fName = searchParams.get("file");
+
+    if (pId && fName) {
+      const project = PROJECTS.find((p) => p.id === pId);
+      const file = project?.files.find((f) => f.name === fName);
+
+      if (project && file) {
+        setExpandedFolders((prev) => { // eslint-disable-line
+            if (prev[pId]) return prev;
+            return { ...prev, [pId]: true };
+        });
+
+        setOpenTabs((prev) => {
+            const exists = prev.some(t => t.projectId === pId && t.file.name === fName);
+            if (exists) return prev;
+            return [...prev, { projectId: pId, file }];
+        });
+
+        setActiveTab((prev) => {
+            if (prev?.projectId === pId && prev?.file.name === fName) return prev;
+            return { projectId: pId, file };
+        });
+      }
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (activeTab) {
+      if (searchParams.get("project") !== activeTab.projectId || searchParams.get("file") !== activeTab.file.name) {
+          params.set("project", activeTab.projectId);
+          params.set("file", activeTab.file.name);
+          router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      }
+    } else {
+      if (searchParams.has("project") || searchParams.has("file")) {
+        router.replace(pathname, { scroll: false });
+      }
+    }
+  }, [activeTab, router, pathname, searchParams]);
 
   const toggleFolder = (projectId: string) => setExpandedFolders(prev => ({ ...prev, [projectId]: !prev[projectId] }));
 
