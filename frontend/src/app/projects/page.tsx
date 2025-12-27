@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,6 +10,7 @@ import {
 import MemoizedMarkdown from "@/components/ui/MemoizedMarkdown";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
 import { PROJECTS, Project, ProjectFile } from "./data";
 import VeruDemo from "./components/VeruDemo";
 import RealibuddyDemo from "./components/RealibuddyDemo";
@@ -19,7 +20,7 @@ type OpenedTab = {
   file: ProjectFile;
 };
 
-export default function ProjectsPage() {
+function ProjectsContent() {
   const [activeTab, setActiveTab] = useState<OpenedTab | null>(null);
   const [openTabs, setOpenTabs] = useState<OpenedTab[]>([]);
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
@@ -267,5 +268,20 @@ export default function ProjectsPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function ProjectsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen pt-14 bg-[#0d0d0d] items-center justify-center text-gray-500 font-mono">
+         <div className="flex flex-col items-center gap-2">
+            <Terminal size={24} className="animate-pulse" />
+            <span>Loading Workspace...</span>
+         </div>
+      </div>
+    }>
+      <ProjectsContent />
+    </Suspense>
   );
 }
