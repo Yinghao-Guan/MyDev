@@ -5,13 +5,13 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Folder, FileCode, FileText, ChevronRight, ChevronDown, Play,
-  Terminal, X, BookOpen, MousePointerClick, Github, ExternalLink
+  Terminal, X, BookOpen, MousePointerClick, Github, ExternalLink, Menu
 } from "lucide-react";
 import MemoizedMarkdown from "@/components/ui/MemoizedMarkdown";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-import { PROJECTS, Project, ProjectFile } from "./data";
+import { PROJECTS, ProjectFile } from "./data";
 import VeruDemo from "./components/VeruDemo";
 import RealibuddyDemo from "./components/RealibuddyDemo";
 
@@ -23,6 +23,7 @@ type OpenedTab = {
 function ProjectsContent() {
   const [activeTab, setActiveTab] = useState<OpenedTab | null>(null);
   const [openTabs, setOpenTabs] = useState<OpenedTab[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
       "veru": true,
       "realibuddy": true,
@@ -90,6 +91,7 @@ function ProjectsContent() {
       setOpenTabs(prev => [...prev, newTab]);
       setActiveTab(newTab);
     }
+    setIsSidebarOpen(false);
   };
 
   // 关闭文件逻辑
@@ -117,14 +119,16 @@ function ProjectsContent() {
   const renderContent = () => {
       if (!activeTab) {
           return (
-             <div className="flex flex-col items-center justify-center h-full text-gray-600 select-none">
-               <div className="relative mb-6">
+             <div className="flex flex-col items-center justify-center h-full text-gray-600 select-none px-6">
+               <div className="relative mb-4 md:mb-6">
                  <div className="absolute inset-0 bg-green-500/20 blur-xl rounded-full animate-pulse" />
-                 <Terminal size={64} className="relative z-10 text-gray-500" />
+                 <Terminal size={48} className="relative z-10 text-gray-500 md:hidden" />
+                 <Terminal size={64} className="relative z-10 text-gray-500 hidden md:block" />
                </div>
-               <h3 className="text-lg font-bold text-gray-400 mb-2">No File Selected</h3>
-               <div className="flex items-center text-sm text-gray-500 bg-gray-900/50 px-4 py-2 rounded border border-gray-800">
-                  <MousePointerClick size={16} className="mr-2 animate-bounce" />
+               <h3 className="text-base md:text-lg font-bold text-gray-400 mb-2">No File Selected</h3>
+               <div className="flex items-center text-xs md:text-sm text-gray-500 bg-gray-900/50 px-3 md:px-4 py-2 rounded border border-gray-800">
+                  <MousePointerClick size={14} className="mr-2 animate-bounce md:hidden" />
+                  <MousePointerClick size={16} className="mr-2 animate-bounce hidden md:block" />
                   <span>Select a file from the <strong className="text-gray-300">EXPLORER</strong> to view details.</span>
                </div>
              </div>
@@ -156,7 +160,7 @@ function ProjectsContent() {
       if (file.type === "code") {
           return (
              <div className="h-full overflow-y-auto p-0">
-                <div className="p-6">
+                <div className="p-4 md:p-6">
                     <div className="text-xs text-gray-500 mb-2 font-mono flex justify-between">
                         <span>{file.name}</span>
                         <span>ReadOnly</span>
@@ -165,7 +169,7 @@ function ProjectsContent() {
                         style={vscDarkPlus}
                         language={file.language || 'text'}
                         PreTag="div"
-                        customStyle={{ margin: 0, borderRadius: '8px', background: '#1e1e1e', border: '1px solid #333', fontSize: '0.9em', padding: '1rem', lineHeight: '1.4' }}
+                        customStyle={{ margin: 0, borderRadius: '8px', background: '#1e1e1e', border: '1px solid #333', fontSize: 'clamp(0.8em, 0.7em + 0.5vw, 0.9em)', padding: 'clamp(0.75rem, 0.6rem + 0.6vw, 1rem)', lineHeight: '1.4' }}
                     >
                         {file.content ? String(file.content).replace(/\n$/, '') : ''}
                     </SyntaxHighlighter>
@@ -178,7 +182,7 @@ function ProjectsContent() {
       if (file.type === "readme" || file.type === "markdown") {
            return (
              <div className="h-full overflow-y-auto p-0">
-               <div className="max-w-3xl mx-auto p-8 prose prose-invert prose-sm">
+               <div className="max-w-3xl mx-auto p-5 md:p-8 prose prose-invert prose-sm">
                   <MemoizedMarkdown content={file.content || ""} />
                </div>
              </div>
@@ -189,15 +193,28 @@ function ProjectsContent() {
   };
 
   return (
-    <div className="flex h-screen pt-14 text-sm font-mono overflow-hidden bg-[#0d0d0d] text-gray-300">
+    <div className="flex h-screen pt-14 text-xs md:text-sm font-mono overflow-hidden bg-[#0d0d0d] text-gray-300">
       {/* Sidebar (Explorer) */}
-      <aside className="w-64 border-r border-gray-800 bg-[#050505] flex flex-col shrink-0">
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.button
+            type="button"
+            aria-label="Close Explorer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-30 bg-black/60 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+      <aside className={`fixed inset-y-14 left-0 z-40 w-72 border-r border-gray-800 bg-[#050505] flex flex-col shrink-0 transition-transform duration-200 md:static md:translate-x-0 md:w-64 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:flex`}>
         <div className="p-3 text-xs font-bold text-gray-500 tracking-wider flex items-center justify-between select-none">
           <span>EXPLORER</span>
           <Terminal size={12} />
         </div>
         <div className="flex-1 overflow-y-auto px-2 py-1">
-            <div className="flex items-center text-blue-400 font-bold mb-1 px-1 text-xs select-none">
+            <div className="hidden md:flex items-center text-blue-400 font-bold mb-1 px-1 text-xs select-none">
               <ChevronDown size={14} className="mr-1" />
               PETER_GUAN_PORTFOLIO
             </div>
@@ -211,7 +228,7 @@ function ProjectsContent() {
                       <span className="truncate">{project.name}</span>
                     </div>
                     {/* Github/Live Links on Hover */}
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="hidden md:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {project.live && <a href={project.live} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-green-400"><ExternalLink size={13} /></a>}
                         <a href={project.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-white"><Github size={13} /></a>
                     </div>
@@ -225,7 +242,7 @@ function ProjectsContent() {
                         return (
                           <div key={file.name} onClick={() => openFile(project.id, file)} className={`flex items-center px-2 py-1.5 cursor-pointer rounded mb-0.5 transition-colors select-none ${isActive ? "bg-green-900/20 text-green-400" : "hover:bg-gray-800 text-gray-400 hover:text-gray-200"}`}>
                             <span className="mr-2 opacity-80">{getFileIcon(file.type, file.name)}</span>
-                            <span>{file.name}</span>
+                            <span className="truncate">{file.name}</span>
                           </div>
                         );
                       })}
@@ -239,8 +256,42 @@ function ProjectsContent() {
 
       {/* Main Stage */}
       <main className="flex-1 flex flex-col bg-[#0d0d0d] min-w-0">
-        {/* Tabs Bar */}
-        <div className="h-9 bg-[#050505] border-b border-gray-800 flex items-center px-0 gap-0 overflow-x-auto no-scrollbar select-none">
+        {/* Mobile Header */}
+        <div className="md:hidden h-12 bg-[#050505] border-b border-gray-800 flex items-center justify-between px-3 select-none">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 text-gray-400 hover:text-white focus:outline-none"
+            aria-label="Toggle explorer"
+          >
+            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <div className="flex items-center gap-2 text-gray-400">
+            {activeTab ? (
+              <>
+                <span className="text-gray-500">{currentProject?.name}</span>
+                <ChevronRight size={12} className="text-gray-600" />
+                <span className="text-gray-200 truncate max-w-[140px]">{activeTab.file.name}</span>
+              </>
+            ) : (
+              <span className="text-gray-500">Select a file</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {currentProject?.live && (
+              <a href={currentProject.live} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300">
+                <ExternalLink size={16} />
+              </a>
+            )}
+            {currentProject?.github && (
+              <a href={currentProject.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
+                <Github size={16} />
+              </a>
+            )}
+          </div>
+        </div>
+
+        {/* Tabs Bar (Desktop Only) */}
+        <div className="hidden md:flex h-9 bg-[#050505] border-b border-gray-800 items-center px-0 gap-0 overflow-x-auto no-scrollbar select-none">
           {openTabs.map((tab) => {
             const isActive = activeTab === tab;
             return (
