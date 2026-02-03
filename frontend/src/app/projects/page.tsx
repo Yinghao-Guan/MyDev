@@ -11,7 +11,7 @@ import MemoizedMarkdown from "@/components/ui/MemoizedMarkdown";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-import { PROJECTS, ProjectFile } from "./data";
+import { PROJECTS, RESUME_PROJECT, ProjectFile } from "./data";
 import VeruDemo from "./components/VeruDemo";
 import RealibuddyDemo from "./components/RealibuddyDemo";
 
@@ -24,23 +24,34 @@ function ProjectsContent() {
   const [activeTab, setActiveTab] = useState<OpenedTab | null>(null);
   const [openTabs, setOpenTabs] = useState<OpenedTab[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
       "veru": true,
       "realibuddy": true,
       "gradecalc": false,
-      "mymd": false
+      "mymd": false,
+      "resume": true
   });
+
+  const ALL_PROJECTS = [...PROJECTS, RESUME_PROJECT];
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    const updateIsMobile = () => setIsMobile(window.matchMedia("(max-width: 767px)").matches);
+    updateIsMobile();
+    window.addEventListener("resize", updateIsMobile);
+    return () => window.removeEventListener("resize", updateIsMobile);
+  }, []);
+
+  useEffect(() => {
     const pId = searchParams.get("project");
     const fName = searchParams.get("file");
 
     if (pId && fName) {
-      const project = PROJECTS.find((p) => p.id === pId);
+      const project = ALL_PROJECTS.find((p) => p.id === pId);
       const file = project?.files.find((f) => f.name === fName);
 
       if (project && file) {
@@ -88,7 +99,7 @@ function ProjectsContent() {
       setActiveTab(existingTab);
     } else {
       const newTab = { projectId, file };
-      setOpenTabs(prev => [...prev, newTab]);
+      setOpenTabs(prev => (isMobile ? [newTab] : [...prev, newTab]));
       setActiveTab(newTab);
     }
     setIsSidebarOpen(false);
@@ -110,10 +121,11 @@ function ProjectsContent() {
     if (type === "demo") return <Play size={14} className="text-green-500" />;
     if (name.endsWith(".py")) return <FileCode size={14} className="text-yellow-400" />;
     if (name.endsWith(".js") || name.endsWith(".ts")) return <FileCode size={14} className="text-yellow-400" />;
+    if (name.endsWith(".json")) return <FileCode size={14} className="text-emerald-400" />;
     return <FileCode size={14} className="text-gray-400" />;
   };
 
-  const currentProject = activeTab ? PROJECTS.find(p => p.id === activeTab.projectId) : null;
+  const currentProject = activeTab ? ALL_PROJECTS.find(p => p.id === activeTab.projectId) : null;
 
   // --- [Render Logic] ---
   const renderContent = () => {
@@ -214,7 +226,30 @@ function ProjectsContent() {
           <Terminal size={12} />
         </div>
         <div className="flex-1 overflow-y-auto px-2 py-1">
+            <div className="flex md:hidden items-center text-blue-400 font-bold mb-1 px-1 text-xs select-none">
+              <ChevronDown size={14} className="mr-1" />
+              PETER_GUAN_RESUME
+            </div>
             <div className="hidden md:flex items-center text-blue-400 font-bold mb-1 px-1 text-xs select-none">
+              <ChevronDown size={14} className="mr-1" />
+              PETER_GUAN_RESUME
+            </div>
+            <div className="ml-2 border-l border-gray-800 pl-1">
+              {RESUME_PROJECT.files.map((file) => {
+                const isActive = activeTab?.projectId === RESUME_PROJECT.id && activeTab?.file.name === file.name;
+                return (
+                  <div key={file.name} onClick={() => openFile(RESUME_PROJECT.id, file)} className={`flex items-center px-2 py-1.5 cursor-pointer rounded mb-0.5 transition-colors select-none ${isActive ? "bg-green-900/20 text-green-400" : "hover:bg-gray-800 text-gray-400 hover:text-gray-200"}`}>
+                    <span className="mr-2 opacity-80">{getFileIcon(file.type, file.name)}</span>
+                    <span className="truncate">{file.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex md:hidden items-center text-blue-400 font-bold mb-1 mt-3 px-1 text-xs select-none">
+              <ChevronDown size={14} className="mr-1" />
+              PETER_GUAN_PORTFOLIO
+            </div>
+            <div className="hidden md:flex items-center text-blue-400 font-bold mb-1 mt-3 px-1 text-xs select-none">
               <ChevronDown size={14} className="mr-1" />
               PETER_GUAN_PORTFOLIO
             </div>
@@ -230,7 +265,7 @@ function ProjectsContent() {
                     {/* Github/Live Links on Hover */}
                     <div className="hidden md:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {project.live && <a href={project.live} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-green-400"><ExternalLink size={13} /></a>}
-                        <a href={project.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-white"><Github size={13} /></a>
+                        {project.github && <a href={project.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-white"><Github size={13} /></a>}
                     </div>
                 </div>
                 {/* Files List */}
@@ -308,7 +343,7 @@ function ProjectsContent() {
               <div className="flex items-center gap-3 px-3 h-full border-l border-gray-800/50 bg-[#050505]">
                  <span className="hidden md:inline text-xs text-gray-600 mr-1">{currentProject.name}</span>
                  {currentProject.live && <a href={currentProject.live} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-green-500 hover:text-green-300 bg-green-900/20 px-2 py-1 rounded border border-green-900/50"><ExternalLink size={12} /><span className="font-bold">Live</span></a>}
-                 <a href={currentProject.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded"><Github size={12} /><span>Repo</span></a>
+                 {currentProject.github && <a href={currentProject.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded"><Github size={12} /><span>Repo</span></a>}
               </div>
           )}
         </div>
