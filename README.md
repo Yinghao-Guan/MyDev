@@ -1,105 +1,136 @@
-# Peter Guan's Digital Cortex (.dev)
+# Peter Guan Digital Cortex
 
-> A high-performance, terminal-styled portfolio for showcasing hardcore engineering & quantitative research projects.
-> Built with Next.js 15, FastAPI, and Local LLMs.
+Interactive portfolio with a terminal-style interface, project demos, and AI-backed backend endpoints.
 
-## 🚀 Tech Stack
+## Current Stack
 
-### Frontend (The Face)
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS + Shadcn UI
-- **Visuals**: Three.js / React Three Fiber (R3F) - Interactive Particle System
-- **Animation**: Framer Motion
+### Frontend (`frontend/`)
+- Next.js `16.0.8` (App Router, React `19.2.1`)
+- TypeScript
+- Tailwind CSS v4
+- Framer Motion
+- React Three Fiber / Drei / Three.js
+- Vercel Analytics
 
-### Backend (The Brain)
-- **Framework**: FastAPI (Python)
-- **AI Engine**: LangChain + Ollama (Running Llama 3.1 / Qwen locally) / Gemini API (Planned)
-- **Architecture**: REST API with Streaming Response (Server-Sent Events)
+### Backend (`backend/`)
+- FastAPI + Uvicorn
+- LangChain Google GenAI (`ChatGoogleGenerativeAI`)
+- Google Gemini APIs (`gemini-2.5-flash`)
+- SlowAPI rate limiting
+- HTTPX for external API calls
 
----
+## What The App Does
 
-## 🛠️ Installation & Setup
+- Home page terminal UX (desktop) and mobile messenger UI
+- Built-in local shell-like commands: `help`, `whoami`, `ls`, `cd`, `clear`, `cmatrix`, `cowsay`
+- LLM chat streaming from backend (`/api/chat`)
+- Veru citation-audit demo using NDJSON streaming (`/api/audit`)
+- Realibuddy claim-check demo (`/api/realibuddy/audit`)
+- Backend wake-up ping on load (`/api/health`)
+
+## API Endpoints
+
+- `GET /api/health`: health/wake check
+- `POST /api/chat`: streaming terminal chat response (`text/event-stream`)
+- `POST /api/audit`: citation extraction + verification stream (`application/x-ndjson`), rate-limited to `10/minute`
+- `POST /api/realibuddy/audit`: fact-check response with optional `source_filter`
+
+## Local Development
 
 ### Prerequisites
 - Python 3.10+
-- Node.js 18+
-- [Ollama](https://ollama.com/) (for local AI inference)
+- Node.js 20+ (recommended for Next.js 16)
+- npm
+- Gemini API key(s)
 
-### 1. Backend Setup (Python)
-
-Navigate to the backend directory and set up the virtual environment.
+### 1) Backend setup
 
 ```bash
 cd backend
 python3 -m venv .venv
-source .venv/bin/activate  # MacOS/Linux
-# .venv\Scripts\activate   # Windows
-
-# Install dependencies
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**Configuration (.env)**: Create a `.env` file in `backend/`:
+Create `backend/.env`:
 
-```
-AI_PROVIDER=ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1:8b
+```env
+# Used by /api/chat and Realibuddy service
+DEV_API_KEY=your_gemini_api_key
+
+# Used by citation extraction/auditor/google search modules
+GEMINI_API_KEY=your_gemini_api_key
+
+# Optional: only used in experimental perplexity service file
+PERPLEXITY_API_KEY=
+
+# Optional runtime port (default 8000)
+PORT=8000
 ```
 
-**Run Server:**
+Run backend:
 
 ```bash
-# Runs on http://localhost:8000
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 2. Frontend Setup (Next.js)
-
-Open a new terminal tab.
+### 2) Frontend setup
 
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
+```
 
-# Run Development Server
+Create `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Run frontend:
+
+```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000` to access the neural link.
+Open `http://localhost:3000`.
 
-## AI Context Injection (RAG)
+## Scripts
 
-The system uses a lightweight Context Injection mechanism to ground the AI in reality.
+In `frontend/`:
+- `npm run dev`
+- `npm run build`
+- `npm run start`
+- `npm run lint`
 
-- **Data Source**: `backend/app/data.py`
-- **Mechanism**: System Prompt Injection via LangChain
-- **Capabilities**: The AI is aware of Peter's resume, tech stack, and project details (Veru, MyMD, etc.).
+In `backend/`:
+- `uvicorn app.main:app --reload --port 8000`
 
-## Project Structure
+## Project Layout
 
-```
+```text
 .
-├── backend/            # FastAPI Python Server
+├── backend/
 │   ├── app/
-│   │   ├── main.py     # API Entry & Streaming Logic
-│   │   └── data.py     # Resume Data / Knowledge Base
+│   │   ├── main.py                # FastAPI app and routes
+│   │   ├── data.py                # Portfolio context used by chat system prompt
+│   │   └── services/              # Veru/Realibuddy/search/auditor modules
 │   └── requirements.txt
-│
-└── frontend/           # Next.js Application
+└── frontend/
     ├── src/
-    │   ├── app/        # App Router Pages
-    │   ├── components/
-    │   │   ├── features/ # Terminal & Interactive Components
-    │   │   └── layout/   # 3D Backgrounds & Navbar
-    └── public/
+    │   ├── app/                   # Next.js routes: home, about, projects
+    │   ├── components/            # UI/features/layout components
+    │   └── hooks/                 # Terminal state/command logic
+    ├── public/
+    └── package.json
 ```
+
+## Notes
+
+- `backend/app/services/perplexity.py` exists but is not wired into active API routes.
+- CORS in backend is currently restricted to localhost and specific production domains.
 
 ## License
 
-Private Portfolio Project.
-
+Private portfolio project.
 
