@@ -112,7 +112,7 @@ export default function RealibuddyDemo() {
                   </div>
                   <div className="flex items-center space-x-3">
                       <div className={`${styles.statusDot} ${styles.statusConnected}`}></div>
-                      <div><div className="text-xs text-gray-400 font-medium">Backend API</div><div className="text-sm font-semibold">Online (Gemini 2.0)</div></div>
+                      <div><div className="text-xs text-gray-400 font-medium">Backend API</div><div className="text-sm font-semibold">Online (Gemini 2.5 Flash)</div></div>
                   </div>
                   <div className="flex items-center space-x-3">
                       <div className={`${styles.statusDot} ${status === 'processing' ? styles.statusConnecting : ''}`}></div>

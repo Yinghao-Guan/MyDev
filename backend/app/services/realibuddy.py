@@ -17,8 +17,8 @@ class RealibuddyService:
         else:
             genai.configure(api_key=API_KEY)
 
-        # 使用 Gemini 2.0 Flash
-        self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        # 使用 Gemini 2.5 Flash
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
 
     def _clean_json_text(self, text: str) -> str:
         """清理 LLM 返回的 Markdown 格式"""
