@@ -30,7 +30,10 @@ const MemoizedMarkdown = memo(({ content }: { content: string }) => {
         strong: ({ node, ...props }) => <strong className="font-bold text-green-100" {...props} />,
         em: ({ node, ...props }) => <em className="italic text-green-200/80" {...props} />,
         blockquote: ({ node, ...props }) => (
-          <blockquote className="border-l-4 border-green-500/50 pl-4 py-1 my-4 italic text-gray-500 bg-gray-900/30 rounded-r" {...props} />
+          <blockquote
+            className="border-l-4 border-green-500/50 pl-4 py-1 my-4 italic text-gray-500 bg-gray-900/30 rounded-r [&_p]:whitespace-pre-line"
+            {...props}
+          />
         ),
 
         // --- 3. 列表样式 ---
