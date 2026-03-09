@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 // [修改 1]: 扩展类型定义
@@ -22,6 +22,19 @@ const generateCowsay = (text: string) => {
                 ||----w |
                 ||     ||
   `;
+};
+
+const PROJECT_PATH_ALIASES: Record<string, string> = {
+  veru: "veru",
+  veru_citationauditor: "veru",
+  realibuddy: "realibuddy",
+  realibuddy_factcheck: "realibuddy",
+  solaura: "solaura",
+  solaura_spatialaudio: "solaura",
+  mymd: "mymd",
+  mymd_compiler: "mymd",
+  gradecalc: "gradecalc",
+  gradecalc_tool: "gradecalc",
 };
 
 export const useTerminalSystem = (isConnectionOpen = true) => {
@@ -171,8 +184,9 @@ Stack: Python, Next.js, C++, Haskell, PyTorch
 └── projects/
     ├── Veru
     ├── RealiBuddy
-    ├── GradeCalc
-    └── MyMD
+    ├── Solaura
+    ├── MyMD
+    └── GradeCalc
       `;
       setHistory((prev) => [...prev, { role: "system", content: treeOutput.trim() }]);
       return;
@@ -181,11 +195,35 @@ Stack: Python, Next.js, C++, Haskell, PyTorch
     // [CD]
     if (mainCommand === "cd") {
       setHistory((prev) => [...prev, { role: "user", content: input }]);
-      const target = args[1] ? args[1].toLowerCase() : "~";
+      const rawTarget = args[1] || "~";
+      const target = rawTarget.toLowerCase();
 
       if (["projects", "projects/", "./projects"].includes(target)) {
         setHistory((prev) => [...prev, { role: "system", content: "Navigating to ~/projects..." }]);
         setTimeout(() => router.push("/projects"), 500);
+      } else if (
+        target.startsWith("projects/") ||
+        target.startsWith("./projects/") ||
+        target.startsWith("/projects/") ||
+        target.startsWith("~/projects/")
+      ) {
+        const normalizedProjectPath = target
+          .replace(/^\.?\//, "")
+          .replace(/^~\//, "")
+          .replace(/^projects\//, "")
+          .replace(/\/+$/, "");
+
+        const projectSegment = normalizedProjectPath.split("/")[0];
+        const projectId = PROJECT_PATH_ALIASES[projectSegment];
+
+        if (projectId) {
+          setHistory((prev) => [...prev, { role: "system", content: `Opening ${rawTarget} README.md...` }]);
+          setTimeout(() => {
+            router.push(`/projects?project=${projectId}&file=README.md`);
+          }, 500);
+        } else {
+          setHistory((prev) => [...prev, { role: "system", content: `bash: cd: ${rawTarget}: No such file or directory` }]);
+        }
       } else if (["about", "about/"].includes(target)) {
         setHistory((prev) => [...prev, { role: "system", content: "Navigating to ~/about..." }]);
         setTimeout(() => router.push("/about"), 500);

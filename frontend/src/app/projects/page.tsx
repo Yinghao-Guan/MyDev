@@ -30,7 +30,7 @@ function ProjectsContent() {
       "realibuddy": true,
       "gradecalc": false,
       "mymd": false,
-      "solaura": false,
+      "solaura": true,
       "resume": true
   });
 
