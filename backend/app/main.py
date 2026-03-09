@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 # from langchain_ollama import ChatOllama
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.messages import HumanMessage, SystemMessage
 
 # --- [Veru Services Imports] ---
 from app.services.llm_extractor import extract_citations_from_text

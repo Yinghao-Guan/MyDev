@@ -325,7 +325,7 @@ While this v2.0 is a solo refactor for demonstration, the core concept and origi
 
 * **[Sean Esla](https://github.com/seanesla)** - Original Frontend & UI Lead
 * **[Justin Alexander](https://github.com/juhsztn)** - Product Documentation & Pitch
-* **[Aung Min Khant](https://www.linkedin.com/in/real-aungminkhant/)** - Concept Ideation & Strategy
+* **[Aung Min Khant](https://github.com/Amk-smc)** - Concept Ideation & Strategy
 * **Peter Guan** - Full Stack Refactor (v2.0) & Original Backend Logic
 
 > *Note: The UI in this portfolio version is a React reimplementation faithfully recreating the original design by Sean Esla.*
