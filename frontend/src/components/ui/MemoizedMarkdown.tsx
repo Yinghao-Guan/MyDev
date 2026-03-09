@@ -5,11 +5,14 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 // 选用一个极客风的深色主题
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 const MemoizedMarkdown = memo(({ content }: { content: string }) => {
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[rehypeKatex]}
       components={{
         // --- 1. 标题样式 (修复 Tailwind 重置问题) ---
         h1: ({ node, ...props }) => (

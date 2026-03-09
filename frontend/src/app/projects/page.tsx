@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Folder, FileCode, FileText, ChevronRight, ChevronDown, Play,
-  Terminal, X, BookOpen, MousePointerClick, Github, ExternalLink, Menu
+  Terminal, X, BookOpen, MousePointerClick, Github, ExternalLink, Menu, Trophy
 } from "lucide-react";
 import MemoizedMarkdown from "@/components/ui/MemoizedMarkdown";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -30,6 +30,7 @@ function ProjectsContent() {
       "realibuddy": true,
       "gradecalc": false,
       "mymd": false,
+      "solaura": false,
       "resume": true
   });
 
@@ -156,6 +157,18 @@ function ProjectsContent() {
                   return <VeruDemo />;
               case "realibuddy":
                   return <RealibuddyDemo />;
+              case "solaura":
+                  return (
+                    <div className="w-full h-full bg-black">
+                        <iframe
+                          src="https://www.youtube.com/embed/5NcpUsCvCrM"
+                          className="w-full h-full border-none"
+                          title="Solaura Demo Video"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
+                    </div>
+                  );
               case "gradecalc":
                   return (
                     <div className="w-full h-full bg-[#F5F5F7]">
@@ -265,6 +278,7 @@ function ProjectsContent() {
                     {/* Github/Live Links on Hover */}
                     <div className="hidden md:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {project.live && <a href={project.live} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-green-400"><ExternalLink size={13} /></a>}
+                        {project.devpost && <a href={project.devpost} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-cyan-400"><Trophy size={13} /></a>}
                         {project.github && <a href={project.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-white"><Github size={13} /></a>}
                     </div>
                 </div>
@@ -317,6 +331,11 @@ function ProjectsContent() {
                 <ExternalLink size={16} />
               </a>
             )}
+            {currentProject?.devpost && (
+              <a href={currentProject.devpost} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300">
+                <Trophy size={16} />
+              </a>
+            )}
             {currentProject?.github && (
               <a href={currentProject.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
                 <Github size={16} />
@@ -343,6 +362,7 @@ function ProjectsContent() {
               <div className="flex items-center gap-3 px-3 h-full border-l border-gray-800/50 bg-[#050505]">
                  <span className="hidden md:inline text-xs text-gray-600 mr-1">{currentProject.name}</span>
                  {currentProject.live && <a href={currentProject.live} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-green-500 hover:text-green-300 bg-green-900/20 px-2 py-1 rounded border border-green-900/50"><ExternalLink size={12} /><span className="font-bold">Live</span></a>}
+                 {currentProject.devpost && <a href={currentProject.devpost} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-200 bg-cyan-900/20 px-2 py-1 rounded border border-cyan-900/50"><Trophy size={12} /><span className="font-bold">Devpost</span></a>}
                  {currentProject.github && <a href={currentProject.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white hover:bg-gray-800 px-2 py-1 rounded"><Github size={12} /><span>Repo</span></a>}
               </div>
           )}
