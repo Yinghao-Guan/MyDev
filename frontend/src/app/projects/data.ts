@@ -326,7 +326,7 @@ While this v2.0 is a solo refactor for demonstration, the core concept and origi
 
 * **[Sean Esla](https://github.com/seanesla)** - Original Frontend & UI Lead
 * **[Justin Alexander](https://github.com/juhsztn)** - Product Documentation & Pitch
-* **[Aung Min Khant](https://github.com/Amk-smc)** - Concept Ideation & Strategy
+* **[Jonathan Aung](https://github.com/Aung-Khant)** - Concept Ideation & Strategy
 * **Peter Guan** - Full Stack Refactor (v2.0) & Original Backend Logic
 
 > *Note: The UI in this portfolio version is a React reimplementation faithfully recreating the original design by Sean Esla.*
@@ -857,7 +857,7 @@ const SOLAURA_README = `# Solaura: Spatial Audio AR for the Visually Impaired
 This project was developed during a 24-hour hackathon. 
 * **Peter Guan** - Lead AR & Systems Engineer (Core iOS, Python Backend, UDP Architecture)
 * **[Daniel Park](https://github.com/NokYongKim)** - Frontend Developer (Live Dashboard Visualization)
-* **[Aung Min Khant](https://github.com/Amk-smc)** - Product Pitch & Documentation
+* **[Jonathan Aung](https://github.com/Aung-Khant)** - Product Pitch & Documentation
 * **[Andrew Pan](https://github.com/1965428761pan-commits)** - Concept Ideation & Strategy
 
 ## 💡 The Concept: Giving Objects a Voice
@@ -1054,7 +1054,7 @@ export const PROJECTS: Project[] = [
     devpost: "https://devpost.com/software/solaura-bouewf",
     files: [
       { name: "README.md", type: "readme", content: SOLAURA_README },
-      { name: "Live_Dashboard", type: "demo" },
+      { name: "Demo_video", type: "demo" },
       { name: "CASE_STUDY.md", type: "markdown", content: SOLAURA_CASE_STUDY },
       { name: "MATH_MODEL.md", type: "markdown", content: SOLAURA_MATH_MODEL },
       { name: "spatial_audio.py", type: "code", language: "python", content: SOLAURA_AUDIO_LOGIC },
