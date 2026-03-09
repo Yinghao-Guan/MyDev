@@ -1049,7 +1049,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "solaura",
-    name: "Solaura",
+    name: "Solaura_BlindAssist",
     github: "https://github.com/Yinghao-Guan/solaura",
     devpost: "https://devpost.com/software/solaura-bouewf",
     files: [
