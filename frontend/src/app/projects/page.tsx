@@ -29,7 +29,8 @@ function ProjectsContent() {
       "veru": true,
       "doppel": true,
       "marketeer": true,
-      "village-econ": true,
+      "village-econ": false,
+      "skillset-la": false,
       "realibuddy": false,
       "gradecalc": false,
       "mymd": false,
@@ -188,6 +189,17 @@ function ProjectsContent() {
                           src="https://hackonomics.vercel.app/"
                           className="w-full h-full border-none"
                           title="Village Economy Live Demo"
+                          allowFullScreen
+                        />
+                    </div>
+                  );
+              case "skillset-la":
+                  return (
+                    <div className="w-full h-full bg-black">
+                        <iframe
+                          src="https://vision-hack-rouge.vercel.app/"
+                          className="w-full h-full border-none"
+                          title="Skillset LA Live Demo"
                           allowFullScreen
                         />
                     </div>
