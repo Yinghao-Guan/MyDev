@@ -28,10 +28,11 @@ function ProjectsContent() {
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
       "veru": true,
       "doppel": true,
-      "realibuddy": true,
+      "marketeer": true,
+      "realibuddy": false,
       "gradecalc": false,
       "mymd": false,
-      "solaura": true,
+      "solaura": false,
       "resume": true
   });
 
@@ -164,6 +165,17 @@ function ProjectsContent() {
                           className="w-full h-full border-none"
                           title="Doppel Live Demo"
                           allow="camera; microphone; accelerometer; gyroscope"
+                          allowFullScreen
+                        />
+                    </div>
+                  );
+              case "marketeer":
+                  return (
+                    <div className="w-full h-full bg-black">
+                        <iframe
+                          src="https://marketeer-eight.vercel.app/"
+                          className="w-full h-full border-none"
+                          title="Marketeer Live Demo"
                           allowFullScreen
                         />
                     </div>
