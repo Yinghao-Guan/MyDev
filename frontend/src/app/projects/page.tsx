@@ -27,6 +27,7 @@ function ProjectsContent() {
   const [isMobile, setIsMobile] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
       "veru": true,
+      "doppel": true,
       "realibuddy": true,
       "gradecalc": false,
       "mymd": false,
@@ -155,6 +156,18 @@ function ProjectsContent() {
           switch (projectId) {
               case "veru":
                   return <VeruDemo />;
+              case "doppel":
+                  return (
+                    <div className="w-full h-full bg-black">
+                        <iframe
+                          src="https://bronco-hacks-delta.vercel.app/"
+                          className="w-full h-full border-none"
+                          title="Doppel Live Demo"
+                          allow="camera; microphone; accelerometer; gyroscope"
+                          allowFullScreen
+                        />
+                    </div>
+                  );
               case "realibuddy":
                   return <RealibuddyDemo />;
               case "solaura":
