@@ -124,6 +124,7 @@ function ProjectsContent() {
     if (type === "readme") return <BookOpen size={14} className="text-blue-400" />;
     if (type === "markdown") return <FileText size={14} className="text-purple-400" />;
     if (type === "demo") return <Play size={14} className="text-green-500" />;
+    if (type === "pdf") return <FileText size={14} className="text-red-400" />;
     if (name.endsWith(".py")) return <FileCode size={14} className="text-yellow-400" />;
     if (name.endsWith(".js") || name.endsWith(".ts")) return <FileCode size={14} className="text-yellow-400" />;
     if (name.endsWith(".json")) return <FileCode size={14} className="text-emerald-400" />;
@@ -230,7 +231,24 @@ function ProjectsContent() {
           }
       }
 
-      // 2. Handle Code
+      // 2. Handle PDF
+      if (file.type === "pdf") {
+          return (
+              <div className="w-full h-full bg-[#1a1a1a]">
+                  {file.url ? (
+                      <iframe
+                          src={file.url}
+                          className="w-full h-full border-none"
+                          title={file.name}
+                      />
+                  ) : (
+                      <div className="flex items-center justify-center h-full text-gray-500">No PDF URL provided.</div>
+                  )}
+              </div>
+          );
+      }
+
+      // 3. Handle Code
       if (file.type === "code") {
           return (
              <div className="h-full overflow-y-auto p-0">

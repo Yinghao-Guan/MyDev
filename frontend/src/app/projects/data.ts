@@ -1,9 +1,10 @@
 // --- Types ---
 export type ProjectFile = {
   name: string;
-  type: "readme" | "demo" | "code" | "markdown";
+  type: "readme" | "demo" | "code" | "markdown" | "pdf";
   language?: string;
   content?: string;
+  url?: string;
 };
 
 export type Project = {
@@ -1191,6 +1192,7 @@ export const PROJECTS: Project[] = [
     files: [
       { name: "README.md", type: "readme", content: DOPPEL_README },
       { name: "Live_Demo", type: "demo" },
+      { name: "math_doppel.pdf", type: "pdf", url: "/math_doppel.pdf" },
     ]
   },
   {
