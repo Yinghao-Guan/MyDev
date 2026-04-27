@@ -47,3 +47,10 @@ frontend/pnpm-debug.log*
 # --- Local Data ---
 *.sqlite3
 *.db
+
+# others
+temp/
+
+# Vibe Coding
+CLAUDE.md
+AGENTS.md
