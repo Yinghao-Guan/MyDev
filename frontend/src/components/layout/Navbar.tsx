@@ -57,13 +57,21 @@ export default function Navbar() {
           </div>
 
           {/* 3. 右侧：桌面端联系方式 (Desktop Only) */}
-          <a
-            href="mailto:peter@peterguan.com"
-            className="hidden md:flex items-center text-gray-500 hover:text-blue-400 transition-colors"
-          >
-            <Mail size={14} className="mr-2" />
-            <span>contact_me</span>
-          </a>
+          <div className="hidden md:flex items-center gap-4">
+            <a href="https://github.com/yinghao-guan" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" aria-label="GitHub">
+              <Github size={16} />
+            </a>
+            <a href="https://www.linkedin.com/in/yinghao-guan/" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-400 transition-colors" aria-label="LinkedIn">
+              <Linkedin size={16} />
+            </a>
+            <a
+              href="mailto:peter@peterguan.com"
+              className="flex items-center text-gray-500 hover:text-blue-400 transition-colors"
+            >
+              <Mail size={14} className="mr-2" />
+              <span>contact_me</span>
+            </a>
+          </div>
 
           {/* 4. 移动端：汉堡菜单按钮 (Mobile Only) */}
           <button
@@ -113,7 +121,7 @@ export default function Navbar() {
                <div className="text-xs text-gray-500 font-mono mb-4 uppercase tracking-widest">Connect</div>
                <div className="flex gap-6">
                  <a href="https://github.com/yinghao-guan" className="text-gray-400 hover:text-white"><Github size={24} /></a>
-                 <a href="https://linkedin.com/in/yinghaoguan" className="text-gray-400 hover:text-white"><Linkedin size={24} /></a>
+                 <a href="https://www.linkedin.com/in/yinghao-guan/" className="text-gray-400 hover:text-white"><Linkedin size={24} /></a>
                  <a href="mailto:peter@peterguan.com" className="text-gray-400 hover:text-white"><Mail size={24} /></a>
                </div>
             </div>

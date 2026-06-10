@@ -306,11 +306,7 @@ function ProjectsContent() {
           <Terminal size={12} />
         </div>
         <div className="flex-1 overflow-y-auto px-2 py-1">
-            <div className="flex md:hidden items-center text-blue-400 font-bold mb-1 px-1 text-xs select-none">
-              <ChevronDown size={14} className="mr-1" />
-              PETER_GUAN_RESUME
-            </div>
-            <div className="hidden md:flex items-center text-blue-400 font-bold mb-1 px-1 text-xs select-none">
+            <div className="flex items-center text-blue-400 font-bold mb-1 px-1 text-xs select-none">
               <ChevronDown size={14} className="mr-1" />
               PETER_GUAN_RESUME
             </div>
@@ -318,18 +314,14 @@ function ProjectsContent() {
               {RESUME_PROJECT.files.map((file) => {
                 const isActive = activeTab?.projectId === RESUME_PROJECT.id && activeTab?.file.name === file.name;
                 return (
-                  <div key={file.name} onClick={() => openFile(RESUME_PROJECT.id, file)} className={`flex items-center px-2 py-1.5 cursor-pointer rounded mb-0.5 transition-colors select-none ${isActive ? "bg-green-900/20 text-green-400" : "hover:bg-gray-800 text-gray-400 hover:text-gray-200"}`}>
+                  <button key={file.name} onClick={() => openFile(RESUME_PROJECT.id, file)} className={`w-full flex items-center px-2 py-1.5 cursor-pointer rounded mb-0.5 transition-colors select-none text-left ${isActive ? "bg-green-900/20 text-green-400" : "hover:bg-gray-800 text-gray-400 hover:text-gray-200"}`}>
                     <span className="mr-2 opacity-80">{getFileIcon(file.type, file.name)}</span>
                     <span className="truncate">{file.name}</span>
-                  </div>
+                  </button>
                 );
               })}
             </div>
-            <div className="flex md:hidden items-center text-blue-400 font-bold mb-1 mt-3 px-1 text-xs select-none">
-              <ChevronDown size={14} className="mr-1" />
-              PETER_GUAN_PORTFOLIO
-            </div>
-            <div className="hidden md:flex items-center text-blue-400 font-bold mb-1 mt-3 px-1 text-xs select-none">
+            <div className="flex items-center text-blue-400 font-bold mb-1 mt-3 px-1 text-xs select-none">
               <ChevronDown size={14} className="mr-1" />
               PETER_GUAN_PORTFOLIO
             </div>
@@ -337,11 +329,11 @@ function ProjectsContent() {
               <div key={project.id} className="mb-1">
                 {/* Project Title Row */}
                 <div className="group flex items-center justify-between pr-2 rounded hover:bg-gray-800/50 cursor-pointer select-none">
-                    <div onClick={() => toggleFolder(project.id)} className={`flex-1 flex items-center px-2 py-1.5 ${expandedFolders[project.id] ? 'text-gray-200' : 'text-gray-500'}`}>
+                    <button onClick={() => toggleFolder(project.id)} className={`flex-1 flex items-center px-2 py-1.5 text-left ${expandedFolders[project.id] ? 'text-gray-200' : 'text-gray-500'}`}>
                       {expandedFolders[project.id] ? <ChevronDown size={14} className="mr-1.5" /> : <ChevronRight size={14} className="mr-1.5" />}
                       <Folder size={14} className={`mr-2 ${expandedFolders[project.id] ? "text-yellow-500" : "text-yellow-500/60"}`} />
                       <span className="truncate">{project.name}</span>
-                    </div>
+                    </button>
                     {/* Github/Live Links on Hover */}
                     <div className="hidden md:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {project.live && <a href={project.live} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-green-400"><ExternalLink size={13} /></a>}
@@ -356,10 +348,10 @@ function ProjectsContent() {
                       {project.files.map((file) => {
                         const isActive = activeTab?.projectId === project.id && activeTab?.file.name === file.name;
                         return (
-                          <div key={file.name} onClick={() => openFile(project.id, file)} className={`flex items-center px-2 py-1.5 cursor-pointer rounded mb-0.5 transition-colors select-none ${isActive ? "bg-green-900/20 text-green-400" : "hover:bg-gray-800 text-gray-400 hover:text-gray-200"}`}>
+                          <button key={file.name} onClick={() => openFile(project.id, file)} className={`w-full flex items-center px-2 py-1.5 cursor-pointer rounded mb-0.5 transition-colors select-none text-left ${isActive ? "bg-green-900/20 text-green-400" : "hover:bg-gray-800 text-gray-400 hover:text-gray-200"}`}>
                             <span className="mr-2 opacity-80">{getFileIcon(file.type, file.name)}</span>
                             <span className="truncate">{file.name}</span>
-                          </div>
+                          </button>
                         );
                       })}
                     </motion.div>

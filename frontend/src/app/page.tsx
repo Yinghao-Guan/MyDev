@@ -28,15 +28,9 @@ const MobileMessenger = dynamic(
   { ssr: false }
 );
 
-function useIsAfternoon(): boolean {
-  const hour = new Date().getHours();
-  return hour >= 12;
-}
-
 export default function Home() {
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
-  const isAfternoon = useIsAfternoon();
-  const [showGameOfLife, setShowGameOfLife] = useState(isAfternoon);
+  const [showGameOfLife, setShowGameOfLife] = useState(false);
 
   return (
     // [修复 Logic]:
