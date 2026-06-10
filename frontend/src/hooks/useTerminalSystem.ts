@@ -27,6 +27,14 @@ const generateCowsay = (text: string) => {
 const PROJECT_PATH_ALIASES: Record<string, string> = {
   veru: "veru",
   veru_citationauditor: "veru",
+  doppel: "doppel",
+  marketeer: "marketeer",
+  "village-econ": "village-econ",
+  village_econ: "village-econ",
+  villageecon: "village-econ",
+  "skillset-la": "skillset-la",
+  skillset_la: "skillset-la",
+  skillsetla: "skillset-la",
   realibuddy: "realibuddy",
   realibuddy_factcheck: "realibuddy",
   solaura: "solaura",
@@ -35,6 +43,7 @@ const PROJECT_PATH_ALIASES: Record<string, string> = {
   mymd_compiler: "mymd",
   gradecalc: "gradecalc",
   gradecalc_tool: "gradecalc",
+  resume: "resume",
 };
 
 export const useTerminalSystem = (isConnectionOpen = true) => {
@@ -182,11 +191,15 @@ Stack: Python, Next.js, C++, Haskell, PyTorch
 .
 ├── about/
 └── projects/
-    ├── Veru
-    ├── RealiBuddy
-    ├── Solaura
-    ├── MyMD
-    └── GradeCalc
+    ├── veru
+    ├── doppel
+    ├── marketeer
+    ├── village-econ
+    ├── skillset-la
+    ├── realibuddy
+    ├── solaura
+    ├── mymd
+    └── gradecalc
       `;
       setHistory((prev) => [...prev, { role: "system", content: treeOutput.trim() }]);
       return;

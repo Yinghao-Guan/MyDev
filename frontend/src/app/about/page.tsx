@@ -1,5 +1,6 @@
 import React from "react";
-import { MapPin, Mail, Github, Linkedin, ExternalLink, Globe } from "lucide-react";
+import Link from "next/link";
+import { MapPin, Mail, Github, Linkedin, ExternalLink, Globe, FolderOpen } from "lucide-react";
 
 const shortHash = (str: string) => {
   let h = 0;
@@ -14,6 +15,7 @@ type LogEntry = {
   tags?: string[];
   isActive?: boolean;
   href?: string;
+  projectId?: string;
 };
 
 function GitLogSection({ title, entries }: { title: string; entries: LogEntry[] }) {
@@ -62,6 +64,15 @@ function GitLogSection({ title, entries }: { title: string; entries: LogEntry[] 
                 )}
                 {entry.subtitle && (
                   <p className="text-gray-500 text-xs mt-0.5">{entry.subtitle}</p>
+                )}
+                {entry.projectId && (
+                  <Link
+                    href={`/projects?project=${entry.projectId}&file=README.md`}
+                    className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-green-600 hover:text-green-400 transition-colors"
+                  >
+                    <FolderOpen size={11} />
+                    ~/projects/{entry.projectId}
+                  </Link>
                 )}
                 {entry.tags && (
                   <div className="flex flex-wrap gap-1 mt-1.5">
@@ -118,6 +129,7 @@ const experience: LogEntry[] = [
     title: "Veru — AI Academic Audit Platform",
     subtitle: "Founder · 200–300 Monthly Active Users",
     href: "https://veru.app",
+    projectId: "veru",
     isActive: true,
   },
   {
@@ -133,40 +145,46 @@ const awards: LogEntry[] = [
     date: "Apr 2026",
     title: "BroncoHacks 2026",
     subtitle: "Best Sport & Fitness Track Winner · Cal Poly Pomona",
+    projectId: "doppel",
   },
   {
     date: "Mar 2026",
     title: "Build with Gemini · UCLA × Google DeepMind",
     subtitle: "Runner-Up Prize Winner",
+    projectId: "marketeer",
   },
   {
     date: "Mar 2026",
     title: "Vision Hack",
     subtitle: "Top 3 Overall · Los Angeles",
+    projectId: "skillset-la",
   },
   {
     date: "Mar 2026",
     title: "Hackonomics Hackathon",
     subtitle: "Honorable Mention",
+    projectId: "village-econ",
   },
   {
     date: "Mar 2026",
     title: "Hack for Humanity 2026",
     subtitle: "Solaura · Santa Clara University",
+    projectId: "solaura",
   },
   {
     date: "Nov 2025",
     title: "HackCC Fall 2025",
     subtitle: "Best AI/ML Prize Winner · MiraCosta College",
+    projectId: "realibuddy",
   },
 ];
 
 const skills = [
-  { label: "Frontend",   value: "React · Next.js · TypeScript · Tailwind · Tauri" },
-  { label: "Backend",    value: "FastAPI · Flask · PostgreSQL · Firebase · Vercel" },
-  { label: "Languages",  value: "Python · Rust · C++ · Java · TypeScript · R · SQL" },
-  { label: "Data",       value: "pandas · NumPy · scikit-learn · Stata" },
-  { label: "Tools",      value: "Git · Docker · GitHub Actions · Linux" },
+  { label: "Frontend",  value: "React · Next.js · TypeScript · Tailwind · Tauri" },
+  { label: "Backend",   value: "FastAPI · Flask · PostgreSQL · Firebase · Vercel" },
+  { label: "Languages", value: "Python · Rust · C++ · Java · TypeScript · R · SQL" },
+  { label: "Data",      value: "pandas · NumPy · scikit-learn · Stata" },
+  { label: "Tools",     value: "Git · Docker · GitHub Actions · Linux" },
 ];
 
 export default function AboutPage() {
